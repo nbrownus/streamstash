@@ -140,6 +140,11 @@ process.on('SIGINT', function () {
     streamStash.stop()
 })
 
+streamStash.once('stopped', function () {
+    logger.info('Exited gracefully')
+    process.exit(0)
+})
+
 // Start it up
 streamStash.start()
 
