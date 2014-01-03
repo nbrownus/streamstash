@@ -3,6 +3,6 @@ addInputPlugin('stdin')
 
 addOutputPlugin('stdout')
 
-addFilter(function () {
-
+addFilter(function (event) {
+    event.done()
 })
