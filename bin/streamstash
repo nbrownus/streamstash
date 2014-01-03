@@ -1,1 +1,188 @@
 #!/usr/bin/env node
+
+var StreamStash = require('../')
+  , util = require('util')
+  , path = require('path')
+  , fs = require('fs')
+  , dashdash = require('dashdash')
+  , plugins = {
+        inputs: {}
+      , outputs: {}
+    }
+
+//TODO: We had -v[vv]
+//TODO: Add a thing to print build in plugins
+process.stdin.resume()
+
+var optParser = new dashdash.Parser({
+    options: [
+        {
+            names: ['help', 'h']
+          , type: 'bool'
+          , help: 'Print this help and exit'
+        }
+    ]
+})
+
+try {
+    var opts = optParser.parse(process.argv)
+} catch (error) {
+    printHelp(error.message)
+}
+
+if (opts.help) {
+    printHelp()
+}
+
+var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO })
+  , streamStash = new StreamStash({ logger: logger })
+
+Object.keys(StreamStash.inputs).forEach(function (plugin) {
+    plugins.inputs[plugin.toLowerCase()] = StreamStash.inputs[plugin]
+})
+
+Object.keys(StreamStash.outputs).forEach(function (plugin) {
+    plugins.outputs[plugin.toLowerCase()] = StreamStash.outputs[plugin]
+})
+
+global.streamStash = streamStash
+global.logger = logger
+
+global.addFilter = function () {
+    streamStash.addFilter.apply(streamStash, arguments)
+}
+
+global.addInputPlugin = function (name, options) {
+    var ctor = loadPlugin('inputs', name)
+        , baseOptions = {
+            streamStash: streamStash
+          , EventContainer: StreamStash.EventContainer
+          , logger: logger
+        }
+
+    streamStash.addInputPlugin(new ctor(util._extend(baseOptions, options)))
+}
+
+global.addOutputPlugin = function (name, options) {
+    var ctor = loadPlugin('outputs', name)
+      , baseOptions = {
+            streamStash: streamStash
+          , logger: logger
+        }
+
+    streamStash.addOutputPlugin(new ctor(util._extend(baseOptions, options)))
+}
+
+//Setup test files
+var configPaths = opts._args
+  , files = []
+  , pathRegex = new RegExp('\\.js$');
+
+//TODO: We must have at least a config file or dir
+
+try {
+    configPaths.forEach(function (testPath) {
+        files = files.concat(lookupFiles(testPath))
+    })
+} catch (error) {
+    var useError
+
+    if (error.code === 'ENOENT') {
+        useError = 'No such file or directory: ' + error.path
+    } else {
+        useError = error.message
+    }
+
+    console.error(useError)
+    process.exit(1)
+}
+
+if (files.length === 0) {
+    printHelp('No config files or directories were provided')
+}
+
+files.forEach(function (filePath) {
+    require(path.resolve(filePath))
+})
+
+//TODO: Install sigint listener like node repl
+streamStash.start()
+
+function loadPlugin (type, name) {
+    var ctor
+      , useName = name.toLowerCase()
+
+    if (plugins[type][useName]) {
+        //Look for our own reporter first
+        ctor = plugins[type][useName]
+
+    } else {
+        //See if it's an external module
+        try {
+            ctor = require(name)
+        } catch (err) {
+            printHelp('Invalid ' + type.slice(0, -1) + ' plugin "' + name + '"')
+        }
+    }
+
+    return ctor
+}
+
+/**
+ * Looks up files within a path, optionally recursively
+ *
+ * @param {String} filePath The file path to search
+ *
+ * @returns {Array.<String>} An array of files found within filePath
+ */
+function lookupFiles (filePath) {
+    var found = []
+      , useFilePath = fs.existsSync(filePath) ? filePath : filePath + '.js'
+
+    var stat = fs.statSync(useFilePath)
+    if (stat.isFile()) {
+        return [useFilePath]
+    }
+
+    fs.readdirSync(useFilePath).forEach(function (file) {
+        var useFile = path.join(useFilePath, file)
+          , stat = fs.statSync(useFile)
+
+        if (stat.isDirectory()) {
+            found = found.concat(lookupFiles(useFile))
+            return
+        }
+
+        if (!stat.isFile() || !pathRegex.test(useFile) || path.basename(useFile)[0] == '.') {
+            return
+        }
+
+        found.push(useFile)
+    })
+
+    return found
+}
+
+/**
+ * Prints the help and optionally an error
+ *
+ * @param {String} [error] An error message to print before the help
+ */
+function printHelp (error) {
+    var status = 0
+
+    console.log()
+
+    if (error) {
+        console.error('ERROR:', error)
+        console.log()
+        status = 1
+    }
+    var width = (process.stdout.getWindowSize) ? process.stdout.getWindowSize()[0] : 120
+
+    console.log('Usage: streamstash [OPTIONS] [<config file or directory>...]\n')
+    console.log('Options:')
+    console.log(optParser.help({ includeEnv: true, maxCol: width }).trimRight())
+
+    process.exit(status)
+}
