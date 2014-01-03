@@ -12,6 +12,7 @@ var StreamStash = require('../')
 
 //TODO: We had -v[vv]
 //TODO: Add a thing to print build in plugins
+
 process.stdin.resume()
 
 var optParser = new dashdash.Parser({
@@ -34,9 +35,6 @@ if (opts.help) {
     printHelp()
 }
 
-var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO })
-  , streamStash = new StreamStash({ logger: logger })
-
 Object.keys(StreamStash.inputs).forEach(function (plugin) {
     plugins.inputs[plugin.toLowerCase()] = StreamStash.inputs[plugin]
 })
@@ -45,13 +43,29 @@ Object.keys(StreamStash.outputs).forEach(function (plugin) {
     plugins.outputs[plugin.toLowerCase()] = StreamStash.outputs[plugin]
 })
 
+var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO })
+  , streamStash = new StreamStash({ logger: logger })
+
+// Build up our globals, helpers for basic usage of StreamStash
 global.streamStash = streamStash
 global.logger = logger
 
-global.addFilter = function () {
-    streamStash.addFilter.apply(streamStash, arguments)
+/**
+ * Adds a filter to the filter chain
+ * TODO: Document the filter function args
+ *
+ * @param {Function} func A filter function to add
+ */
+global.addFilter = function (func) {
+    streamStash.addFilter(func)
 }
 
+/**
+ * Adds an input plugin to be used
+ *
+ * @param {String|Function} name Either a built in input name, path to an input plugin, or constructor
+ * @param {Object} options Configuration options for the plugin, refer to the plugin for more information
+ */
 global.addInputPlugin = function (name, options) {
     var ctor = loadPlugin('inputs', name)
         , baseOptions = {
@@ -63,6 +77,12 @@ global.addInputPlugin = function (name, options) {
     streamStash.addInputPlugin(new ctor(util._extend(baseOptions, options)))
 }
 
+/**
+ * Adds an output plugin to be used
+ *
+ * @param {String|Function} name Either a built in output name, path to an output plugin, or constructor
+ * @param {Object} options Configuration options for the plugin, refer to the plugin for more information
+ */
 global.addOutputPlugin = function (name, options) {
     var ctor = loadPlugin('outputs', name)
       , baseOptions = {
@@ -73,12 +93,10 @@ global.addOutputPlugin = function (name, options) {
     streamStash.addOutputPlugin(new ctor(util._extend(baseOptions, options)))
 }
 
-//Setup test files
+// Setup config files
 var configPaths = opts._args
   , files = []
   , pathRegex = new RegExp('\\.js$');
-
-//TODO: We must have at least a config file or dir
 
 try {
     configPaths.forEach(function (testPath) {
@@ -105,19 +123,48 @@ files.forEach(function (filePath) {
     require(path.resolve(filePath))
 })
 
-//TODO: Install sigint listener like node repl
+// Set up a signal handler for SIGINT to gracefully shutdown
+var secondSig = false
+process.on('SIGINT', function () {
+    if (secondSig) {
+        logger.error('Got SIGINT again, forcefully exiting.')
+        process.exit(1)
+        return
+    }
+
+    logger.info('Got SIGINT, gracefully stopping. Signal again in the next second to forcefully exit')
+
+    secondSig = true
+    setTimeout(function () { secondSig = false }, 1000)
+
+    streamStash.stop()
+})
+
+// Start it up
 streamStash.start()
 
+/**
+ * Tries to load a plugin
+ *
+ * @param {String} type Either `inputs` or `outputs` for whichever type is being loaded
+ * @param {String|Function} name Either an built in plugin name, a path to a plugin to load, or a constructor
+ *
+ * @returns {Function} A constructor for the plugin
+ */
 function loadPlugin (type, name) {
     var ctor
       , useName = name.toLowerCase()
 
-    if (plugins[type][useName]) {
-        //Look for our own reporter first
+    //If we got a function in the first place, use it
+    if (typeof name === 'function') {
+        return name
+
+    //Look for our own reporter first
+    } else if (plugins[type][useName]) {
         ctor = plugins[type][useName]
 
+    //See if it's an external module
     } else {
-        //See if it's an external module
         try {
             ctor = require(name)
         } catch (err) {
