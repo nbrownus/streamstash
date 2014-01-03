@@ -1,0 +1,32 @@
+{
+    "name": "streamstash"
+  , "version": "0.0.1"
+  , "description": "TODO"
+  , "keywords": [
+        "TODO"
+    ]
+  , "author": {
+        "name": "Nathan Brown"
+      , "email": "nbrown.us@gmail.com"
+    }
+  , "repository": {
+        "type": "git"
+      , "url": "https://github.com/nbrownus/streamstash"
+    }
+  , "main": "./index"
+  , "license": "MIT"
+  , "engines": {
+        "node": ">= 0.8.x"
+    }
+  , "scripts": {
+        "test": "make test"
+    }
+  , "dependencies": {
+        "dashdash": "1.4.0"
+    }
+  , "devDependencies": {
+        "istanbul": "0.2.x"
+      , "ppunit": "x"
+      , "should": "2.x"
+    }
+}
