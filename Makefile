@@ -1,15 +1,15 @@
 all: test
 
 test:
-	NODE_ENV=test node_modules/ppunit/bin/ppunit -R list
+	NODE_ENV=test node_modules/ppunit/bin/ppunit -T none -R list
 
 test-cov:
 	NODE_ENV=test node node_modules/istanbul/lib/cli.js --print=detail cover \
-		node_modules/ppunit/bin/ppunit -- -R list
+		node_modules/ppunit/bin/ppunit -- -T none -R list
 
 test-cov-html:
 	NODE_ENV=test node node_modules/istanbul/lib/cli.js --print=summary cover \
-		node_modules/ppunit/bin/ppunit -- -R list
+		node_modules/ppunit/bin/ppunit -- -T none -R list
 
 	@echo ""
 	@echo "****************************************************************************************"

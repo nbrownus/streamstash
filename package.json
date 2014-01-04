@@ -1,9 +1,17 @@
 {
     "name": "streamstash"
   , "version": "0.0.1"
-  , "description": "TODO"
+  , "description": "A log aggregating/filtering/redirecting service"
   , "keywords": [
-        "TODO"
+        "log"
+      , "flume"
+      , "logstash"
+      , "fluentd"
+      , "logs"
+      , "elasticsearch"
+      , "relp"
+      , "syslog"
+      , "rsyslog"
     ]
   , "author": {
         "name": "Nathan Brown"
