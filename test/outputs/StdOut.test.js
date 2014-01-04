@@ -6,8 +6,6 @@ var StreamStash = require('../../')
 
 require('should')
 
-require('should')
-
 describe('Output - StdOut', function () {
     it('Should use the provided streamStash object', function () {
         var streamStash = new EventEmitter()
