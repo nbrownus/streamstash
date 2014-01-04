@@ -64,7 +64,7 @@ global.addFilter = function (func) {
  * Adds an input plugin to be used
  *
  * @param {String|Function} name Either a built in input name, path to an input plugin, or constructor
- * @param {Object} options Configuration options for the plugin, refer to the plugin for more information
+ * @param {Object} [options] Configuration options for the plugin, refer to the plugin for more information
  */
 global.addInputPlugin = function (name, options) {
     var ctor = loadPlugin('inputs', name)
@@ -81,7 +81,7 @@ global.addInputPlugin = function (name, options) {
  * Adds an output plugin to be used
  *
  * @param {String|Function} name Either a built in output name, path to an output plugin, or constructor
- * @param {Object} options Configuration options for the plugin, refer to the plugin for more information
+ * @param {Object} [options] Configuration options for the plugin, refer to the plugin for more information
  */
 global.addOutputPlugin = function (name, options) {
     var ctor = loadPlugin('outputs', name)
