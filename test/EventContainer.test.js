@@ -65,4 +65,19 @@ describe('EventContainer', function () {
         event.processingComplete().should.equal(true)
         event.processingComplete(true).should.equal(false)
     })
+
+    it('Should just return false for #next by default', function () {
+        var event = new EventContainer()
+        event.next().should.equal(false)
+    })
+
+    it('Should just return false for #done by default', function () {
+        var event = new EventContainer()
+        event.done().should.equal(false)
+    })
+
+    it('Should just return false for #cancel by default', function () {
+        var event = new EventContainer()
+        event.cancel().should.equal(false)
+    })
 })
