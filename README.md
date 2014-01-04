@@ -11,7 +11,7 @@ alternative to projects like [logstash](http://logstash.net/), [flume](http://fl
 Inputs are things that slurp event data from different places and provides them to StreamStash for filtering
 (by filters) and outputting (by outputs).
 
-Inputs packaged with StreamStash
+Inputs packaged with StreamStash:
 
 - RELP: Provides an easy and reliable integration with rsyslog. Uses [rsyslogs](http://www.rsyslog.com/) Reliable Event
     Logging Protocol. For more info see the [relp webpage](http://www.rsyslog.com/doc/relp.html)
@@ -25,11 +25,11 @@ The main reason this project exists was to provide users a "real" scripting lang
 data. If you have ever tried using logstash you may have gotten irritated with trying to do anything more than basic
 data manipulation, this is mainly because you were working in almost ruby but not quite.
 
-Every event will contain the following properties in the data object
+Every event will contain the following properties in the data object:
 
-- source: The input plugin that generated the event
-- message: The event message
-- timestamp: The time the event occurred or was received by the input plugin
+- source: The input plugin that generated the event.
+- message: The event message.
+- timestamp: The time the event occurred or was received by the input plugin.
 
 A simple filter example:
 
@@ -65,6 +65,9 @@ A little more advanced:
         // Since this is the last thing in the filter there is no need to return
         event.next()
     }
+
+Remember, this is all pure Node.js. You can do any crazy exotic thing you want. Just remember that the more you do the
+slower each event is processed.
 
 ### Outputs
 
