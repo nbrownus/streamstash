@@ -230,4 +230,97 @@ describe('StreamStash', function () {
         })
 
     })
+
+    describe('#start', function () {
+
+        it('Should not start if not in `configuring` state', function () {
+            var streamStash = new StreamStash({ logger: new Logger() })
+            streamStash.state = 2
+            streamStash.start().should.equal(false)
+        })
+
+        it('Should throw an error if no inputs were configured', function () {
+            var streamStash = new StreamStash({ logger: new Logger() })
+
+            try {
+                streamStash.start()
+            } catch (error) {
+                error.message.should.equal('At least 1 input plugin must be configured')
+                return
+            }
+
+            return new Error('Should have had an error')
+        })
+
+        it('Should throw an error if no inputs were configured', function () {
+            var streamStash = new StreamStash({ logger: new Logger() })
+              , plugin = new EventEmitter()
+
+            plugin.name = '1'
+            streamStash.addInputPlugin(plugin)
+
+            try {
+                streamStash.start()
+            } catch (error) {
+                error.message.should.equal('At least 1 output plugin must be configured')
+                return
+            }
+
+            return new Error('Should have had an error')
+        })
+
+        it('Should start up properly', function () {
+            var streamStash = new StreamStash({ logger: new Logger() })
+              , plugin = new EventEmitter()
+              , sawStart = false
+
+            plugin.name = '1'
+            streamStash.addInputPlugin(plugin)
+            streamStash.addOutputPlugin(plugin)
+
+            streamStash.on('start', function () {
+                sawStart = true
+            })
+
+            //TODO: info log assert
+
+            streamStash.start().should.equal(true)
+            streamStash.stats.startTime.should.instanceof(Date)
+            streamStash.state.should.equal(StreamStash.STATE.STARTED)
+            sawStart.should.equal(true)
+        })
+
+    })
+
+    describe('#stop', function () {
+
+        it('Should not stop if not in `started` state', function () {
+            var streamStash = new StreamStash({ logger: new Logger() })
+            streamStash.stop().should.equal(false)
+        })
+
+        it('Should begin a shutdown properly', function () {
+            var streamStash = new StreamStash({ logger: new Logger() })
+              , sawEvent = false
+
+            streamStash.state = StreamStash.STATE.STARTED
+
+            streamStash.on('stopInput', function () {
+                sawEvent = true
+            })
+
+            streamStash.stop().should.equal(true)
+            streamStash.state.should.equal(StreamStash.STATE.STOPPING_INPUT)
+            sawEvent.should.equal(true)
+            //TODO: info log assert
+        })
+
+        it('Should wait for all inputs to stop then stop all plugins')
+
+        it('Should wait for all in flight events to complete before stopping all plugins')
+
+        it('Should properly stop once all plugins have stopped')
+
+    })
+
 })
