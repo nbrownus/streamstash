@@ -1,3 +1,4 @@
+var util = require('util')
 
 addInputPlugin('relp', { host: 'localhost', port: 5514 })
 addOutputPlugin('stdout')
@@ -5,42 +6,37 @@ addOutputPlugin('stdout')
 addOutputPlugin(
     'elasticsearch'
   , {
-        rename: {
+        typeField: '@type'
+      , rename: {
+            //Rename the fields on output
             'message': '@message'
           , 'timestamp': '@timestamp'
+            //TODO: probably should specify field values for the codec
+          , 'facilityName': '@facility'
+          , 'severityName': '@severity'
+          , 'host': '@host'
+          , 'service': '@tag'
+            //Don't output these fields
+            //TODO: Probably should be able to tell the codec to not give us these fields
+          , 'severity': void 0
+          , 'facility': void 0
+          , 'priority': void 0
+          , 'originalMessage':  void 0
+            //This is so type isn't output twice
+          , '@type': void 0
         }
     }
 )
 
 addFilter(function (event) {
-    delete event.data.originalMessage
-    delete event.data.priority
-
-    event.data['@facility'] = event.data.facilityName
-    delete event.data.facilityName
-    delete event.data.facility
-
-    event.data['@severity'] = event.data.severityName
-    delete event.data.severityName
-    delete event.data.severity
-
-    event.data['@host'] = event.data.host
-    delete event.data.host
-
-    event.data['@tag'] = event.data.service
-    delete event.data.service
+    if (event.data.message.substring(0, 6) === '@json:') {
+        try {
+            var data = JSON.parse(event.data.message.substring(7))
+            event.data = util._extend(event.data, data)
+        } catch (error) {
+            event.data['@type'] = 'unparsable'
+        }
+    }
 
     event.next()
 })
-
-/*
- {
- "@message":" Could no open output pipe '/dev/xconsole': No such file or directory [try http://www.rsyslog.com/e/2039 ]"
-,"@timestamp":"2014-01-06T22:27:10.454Z"
-,"service":"rsyslogd-2039"
-,"host":"nate-ubuntu-vm"
-,"severity":"error"
-,"facility":"syslogd"
-,"source":"RELP"
-}
- */
