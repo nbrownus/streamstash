@@ -2,7 +2,6 @@
 addInputPlugin('stdin')
 
 addOutputPlugin('stdout')
-addOutputPlugin('stdout', { name: 'stdout1' })
 
 addFilter(function (event) {
     event.data.filter1 = true

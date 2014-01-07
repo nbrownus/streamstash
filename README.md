@@ -73,7 +73,20 @@ slower each event is processed.
 
 TODO: Docs!
 
+Outputs packaged with StreamStash:
+
+- ElasticSearch: Outputs event data to your [ElasticSearch](http://www.elasticsearch.org/overview) cluster.
+    Works great with [kibana](http://www.elasticsearch.org/overview/kibana/)
+- StdOut: Writes event data to standard output
+
 ### TODO
 
 - First class support for codecs?
+- Additional codecs/filters for special events?
 - Need to think about outputs for special events
+- Move source out of data and onto the event?
+- Should outputs have a list of exclude fields?
+- Allow outputs to take configurable date string? ISO time might not be that great for us
+- Add some helpers for things like renaming fields in filters?
+- Have outputs allow renaming fields?
+- Maybe outputs have format functions that can be defined that would format the data?
