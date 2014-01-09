@@ -60,14 +60,3 @@ addFilter(function (event) {
 
     event.next()
 })
-
-{
-    nonce: <String>
-    type: <String>
-  , body: <String|Object>
-  , error: {
-        type: <String>
-      , descrption: <String>
-    }
-  , seq: <Number>
-}
