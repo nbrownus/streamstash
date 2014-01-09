@@ -81,8 +81,7 @@ Outputs packaged with StreamStash:
 
 ### TODO
 
-- First class support for codecs?
-- Additional codecs/filters for special events?
+- Codecs are just filters with configurable things
 - Need to think about outputs for special events
 - Move source out of data and onto the event?
 - Should outputs have a list of exclude fields?
@@ -90,3 +89,9 @@ Outputs packaged with StreamStash:
 - Add some helpers for things like renaming fields in filters?
 - Have outputs allow renaming fields?
 - Maybe outputs have format functions that can be defined that would format the data?
+- ElasticSearch output needs some love, dropped a few messages
+
+### Blah
+
+Inputs accept events and fill out the most basic of things: message, timestamp, source
+Message may need to be decoded so the user adds filters for specific sources or based on event data
