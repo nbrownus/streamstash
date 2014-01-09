@@ -13,7 +13,7 @@ var StreamStash = require('../')
 //TODO: We had -v[vv]
 //TODO: Add a thing to print build in plugins
 
-process.stdin.resume()
+//process.stdin.resume()
 
 var optParser = new dashdash.Parser({
     options: [
@@ -147,6 +147,34 @@ streamStash.once('stopped', function () {
 
 // Start it up
 streamStash.start()
+
+var lastTotal = 0
+  , perSec = 0
+  , maxPerSec = 0
+
+process.on('uncaughtException', function (error) {
+    logger.error('Uncaught exception, shutting down:', error)
+    streamStash.stop()
+})
+
+setInterval(function () {
+    perSec = (streamStash.stats.events.total - lastTotal)
+
+    if (perSec > maxPerSec) {
+        maxPerSec = perSec
+    }
+
+    lastTotal = streamStash.stats.events.total
+}, 1000)
+
+setInterval(function () {
+    logger.info(
+        'Processing: ' + streamStash.stats.events.processing
+            + ', Total: ' + streamStash.stats.events.total
+            + ', Current/s: ' + perSec + '/s'
+            + ', Max/s: ' + maxPerSec + '/s'
+    )
+}, 10000)
 
 /**
  * Tries to load a plugin
