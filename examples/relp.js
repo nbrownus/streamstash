@@ -1,7 +1,15 @@
 var util = require('util')
+  , nginxRegex = new RegExp('^(nginx(?!-error)|lb..[ab])')
+  , CombinedAccess = require('../').codecs.CombinedAccess
+  , nginxCodec = new CombinedAccess({
+        regex: new RegExp('^(\\S+) (\\S+) - (\\S+) \\[([^\\]]+)\\] "([A-Z]+[^"]*)" (\\d+) (\\d+) "([^"]*)" "([^"]*)"$')
+      , fields: ['request_id', 'nginx.remote_host', 'nginx.user', 'timestamp', 'message', 'nginx.status_code', 'nginx.bytes', 'nginx.referrer', 'nginx.user_agent']
+      , timestampField: 'timestamp'
+    })
 
+//addInputPlugin('stdin')
 addInputPlugin('relp', { host: 'localhost', port: 5514 })
-addOutputPlugin('stdout')
+//addOutputPlugin('stdout')
 
 addOutputPlugin(
     'elasticsearch'
@@ -29,14 +37,37 @@ addOutputPlugin(
 )
 
 addFilter(function (event) {
+    var data
+
     if (event.data.message.substring(0, 6) === '@json:') {
         try {
-            var data = JSON.parse(event.data.message.substring(7))
+            data = JSON.parse(event.data.message.substring(6))
             event.data = util._extend(event.data, data)
+            event.data.message = event.data['@message']
         } catch (error) {
             event.data['@type'] = 'unparsable'
         }
+
+    } else if (nginxRegex.test(event.data.service)) {
+        nginxCodec.decode(event, function () {
+            //TODO: need to cast some things to Number
+            event.data['@type'] = (event.data.nginx) ? 'nginx_access' : 'unparsable'
+            event.next()
+        })
+
+        return
     }
 
     event.next()
 })
+
+{
+    nonce: <String>
+    type: <String>
+  , body: <String|Object>
+  , error: {
+        type: <String>
+      , descrption: <String>
+    }
+  , seq: <Number>
+}
