@@ -24,8 +24,8 @@
             "headers": {
                 "stupid": "yes"
             },
-            "status": 200,
-            "reason": "OK",
+            "status": 500,
+            "reason": "Internal Server Error",
             "body": "{\"type\":\"videopoker.round.closed\",\"body\":{\"id\":\"QzGro4ElYChnEnanJyISJl\",\"game_id\":\"JX99O1nr0CequaxqZtXUwj\",\"hand\":{\"id\":\"94EMFOTFNskqEHiqKK-rg1\",\"created_at\":1389410382618,\"player_id\":\"L1AKhHMgSU7srmFn\",\"round_id\":\"QzGro4ElYChnEnanJyISJl\",\"cards\":[\"Js\",\"7c\",\"Jh\",\"4d\",\"9h\"],\"auto_hold\":null,\"hand_value\":\"pair\",\"wager\":\"0.10\",\"multiplier\":1,\"unbacked\":true,\"outcome\":\"win\",\"payout\":\"0.10\"},\"payout\":\"0.10\"}}"
         }
     },

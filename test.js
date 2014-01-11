@@ -1,35 +1,51 @@
-//TODO: link these things to kibana
-
 var message = require('./crap.json')
+  , mail = require('nodemailer').mail
+  , qs = require('querystring')
   , timestamp = new Date(message['@timestamp'])
+  , startRange = new Date(timestamp.getTime() - (5 * 60 * 1000))
+  , stopRange = new Date(timestamp.getTime() + (5 * 60 * 1000))
   , http = message.http
+  , fontStyle = 'font-family: Monaco, monospace; font-size: 10pt; white-space: pre;'
+  , title = ' ' + http.response.status + ' ' + http.request.method + ' ' + http.request.url
 
 var body = '<html>\n' +
     '<head>\n' +
+    '<title>' + title + '</title>\n' +
     '</head>\n' +
-    '<body style="font-family: \'Courier New\', monospace;">\n' +
+    '<body style="' + fontStyle + '">' +
     '<table style="border-collapse: collapse; border: 1px solid black;">\n' +
     create_row('Request-Id', message['@request_id'], '@request_id') +
     create_row('Service', message['@tag'], '@tag') +
     create_row('Host', message['@host'], '@host') +
-    create_row('Time', format_date(timestamp), '@timestamp') +
+    create_row('Time', format_date(timestamp), false) +
     create_row('Duration', message['duration'] + 'ms') +
     '</table>\n' +
-    '<pre>\n' +
     format_http_body(message.http) +
-    '</pre>' +
     '</body>\n'
 
-console.log(body)
+mail({
+    from: 'Betable operations <ops@betable.com>'
+  , to: 'nate@betable.com'
+  , subject: title
+  , html: body
+})
+
+//console.log(body)
 
 function create_row (left, right, linkField) {
-    if (linkField) {
-        right = '<a href="https://next.kibana.ops.betable.com/">' + right + '</a>'
+    if (linkField !== void 0) {
+        var query = { from: startRange.toISOString(), to: stopRange.toISOString() }
+        if (linkField !== false) {
+            query.query = linkField + ':' + right
+        }
+
+        right = '<a href="https://next.kibana.ops.betable.com/#/dashboard?' + qs.stringify(query) + '">' + right + '</a>'
     }
-    var style = 'vertical-align: top; padding: 3px; border: 1px solid black;'
+
+    var style = fontStyle + 'vertical-align: top; border: 1px solid black; padding: 3px'
     return '    <tr>\n' +
-        '        <td style="text-align: right; ' + style + '"><pre>' + left + '</pre></td>\n' +
-        '        <td style="' + style + '"><pre>' + right + '</pre></td>\n' +
+        '        <td style="text-align: right; ' + style + '">' + left + '</td>\n' +
+        '        <td style="' + style + '">' + right + '</td>\n' +
         '    </tr>\n'
 }
 
