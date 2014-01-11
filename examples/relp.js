@@ -29,7 +29,6 @@ addOutputPlugin(
           , 'severity': void 0
           , 'facility': void 0
           , 'priority': void 0
-          , 'originalMessage':  void 0
             //This is so type isn't output twice
           , '@type': void 0
         }
@@ -44,6 +43,8 @@ addFilter(function (event) {
             data = JSON.parse(event.data.message.substring(6))
             event.data = util._extend(event.data, data)
             event.data.message = event.data['@message']
+            delete event.data.originalMessage
+
         } catch (error) {
             event.data['@type'] = 'unparsable'
         }
@@ -51,7 +52,13 @@ addFilter(function (event) {
     } else if (nginxRegex.test(event.data.service)) {
         nginxCodec.decode(event, function () {
             //TODO: need to cast some things to Number
-            event.data['@type'] = (event.data.nginx) ? 'nginx_access' : 'unparsable'
+            if (event.data.nginx) {
+                event.data['@type'] = 'nginx_access'
+                delete event.data.originalMessage
+            } else {
+                event.data['@type'] = 'unparsable'
+            }
+
             event.next()
         })
 

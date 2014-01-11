@@ -1,12 +1,3 @@
 
-var RELPSyslog = require('../').codecs.RELPSyslog
-  , codec = new RELPSyslog()
-
-addInputPlugin('stdin')
+addInputPlugin('relp', { host: 'localhost', port: 5514, codec: null })
 addOutputPlugin('stdout')
-
-addFilter(function (event) {
-    codec.decode(event, function () {
-        event.next()
-    })
-})
