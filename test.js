@@ -6,7 +6,7 @@ var message = require('./crap.json')
   , stopRange = new Date(timestamp.getTime() + (5 * 60 * 1000))
   , http = message.http
   , fontStyle = 'font-family: Monaco, monospace; font-size: 10pt; white-space: pre;'
-  , title = ' ' + http.response.status + ' ' + http.request.method + ' ' + http.request.url
+  , title = ' ' + http.response.status + ' ' + message['@tag'] + ' ' + http.request.method + ' ' + http.request.url
 
 var body = '<html>\n' +
     '<head>\n' +
