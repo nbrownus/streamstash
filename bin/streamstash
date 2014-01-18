@@ -153,7 +153,8 @@ var lastTotal = 0
   , maxPerSec = 0
 
 process.on('uncaughtException', function (error) {
-    logger.error('Uncaught exception, shutting down:', error)
+    logger.error('Uncaught exception, shutting down:')
+    logger.error(error)
     streamStash.stop()
 })
 
