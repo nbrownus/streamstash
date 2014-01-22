@@ -47,6 +47,7 @@ var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO })
   , streamStash = new StreamStash({ logger: logger })
 
 // Build up our globals, helpers for basic usage of StreamStash
+global.StreamStash = StreamStash
 global.streamStash = streamStash
 global.logger = logger
 
