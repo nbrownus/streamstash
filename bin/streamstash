@@ -126,20 +126,23 @@ files.forEach(function (filePath) {
 
 // Set up a signal handler for SIGINT to gracefully shutdown
 var secondSig = false
-process.on('SIGINT', function () {
+process.on('SIGINT', attempt_shutdown)
+process.on('SIGTERM', attempt_shutdown)
+
+function attempt_shutdown (signal) {
     if (secondSig) {
         logger.error('Got SIGINT again, forcefully exiting.')
         process.exit(1)
         return
     }
 
-    logger.info('Got SIGINT, gracefully stopping. Signal again in the next second to forcefully exit')
+    logger.info('Got ' + signal + ', gracefully stopping. Signal again in the next second to forcefully exit')
 
     secondSig = true
     setTimeout(function () { secondSig = false }, 1000)
 
     streamStash.stop()
-})
+}
 
 streamStash.once('stopped', function () {
     logger.info('Exited gracefully')
