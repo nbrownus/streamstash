@@ -32,7 +32,7 @@
   , "dependencies": {
         "dashdash": "1.4.0"
       , "underscore": "1.5.2"
-      , "relp": "0.0.1"
+      , "relp": "git://github.com/nbrownus/node-relp"
     }
   , "devDependencies": {
         "istanbul": "0.2.x"
