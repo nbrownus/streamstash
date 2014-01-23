@@ -22,6 +22,12 @@ var optParser = new dashdash.Parser({
           , type: 'bool'
           , help: 'Print this help and exit'
         }
+      , {
+            names: ['kill-timeout', 'k']
+          , type: 'number'
+          , default: 30
+          , help: 'The amount of time to wait for a shutdown before forcing an exit, default 30 seconds'
+        }
     ]
 })
 
@@ -97,7 +103,7 @@ global.addOutputPlugin = function (name, options) {
 // Setup config files
 var configPaths = opts._args
   , files = []
-  , pathRegex = new RegExp('\\.js$');
+  , pathRegex = new RegExp('\\.js$')
 
 try {
     configPaths.forEach(function (testPath) {
@@ -125,27 +131,33 @@ files.forEach(function (filePath) {
 })
 
 // Set up a signal handler for SIGINT to gracefully shutdown
-var secondSig = false
+var killTimeout = opts['kill_timeout']
+  , killTimer = false
+
 process.on('SIGINT', attempt_shutdown)
 process.on('SIGTERM', attempt_shutdown)
 
-function attempt_shutdown (signal) {
-    if (secondSig) {
-        logger.error('Got SIGINT again, forcefully exiting.')
-        process.exit(1)
+function attempt_shutdown () {
+    if (killTimer) {
         return
     }
 
-    logger.info('Got ' + signal + ', gracefully stopping. Signal again in the next second to forcefully exit')
+    killTimer = setTimeout(
+        function () {
+            logger.error('Forcefully exiting after ' + killTimeout + ' seconds')
+            process.exit(1)
+        }
+      , killTimeout * 1000
+    )
 
-    secondSig = true
-    setTimeout(function () { secondSig = false }, 1000)
+    logger.info('Got sigint/sigterm, gracefully stopping. Forceful exit in ' + killTimeout + ' seconds')
 
     streamStash.stop()
 }
 
 streamStash.once('stopped', function () {
     logger.info('Exited gracefully')
+    clearTimeout(killTimer)
     process.exit(0)
 })
 
