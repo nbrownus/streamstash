@@ -134,8 +134,15 @@ files.forEach(function (filePath) {
 var killTimeout = opts['kill_timeout']
   , killTimer = false
 
-process.on('SIGINT', attempt_shutdown)
-process.on('SIGTERM', attempt_shutdown)
+process.on('SIGINT', function () {
+    logger.info('Got SIGINT, starting shutdown')
+    attempt_shutdown()
+})
+
+process.on('SIGTERM', function () {
+    logger.info('Got SIGTERM, starting shutdown')
+    attempt_shutdown()
+})
 
 function attempt_shutdown () {
     if (killTimer) {
@@ -150,7 +157,7 @@ function attempt_shutdown () {
       , killTimeout * 1000
     )
 
-    logger.info('Got sigint/sigterm, gracefully stopping. Forceful exit in ' + killTimeout + ' seconds')
+    logger.info('Forceful exit in ' + killTimeout + ' seconds')
 
     streamStash.stop()
 }
@@ -171,7 +178,7 @@ var lastTotal = 0
 process.on('uncaughtException', function (error) {
     logger.error('Uncaught exception, shutting down:')
     logger.error(error.stack || error)
-    streamStash.stop()
+    attempt_shutdown()
 })
 
 setInterval(function () {
