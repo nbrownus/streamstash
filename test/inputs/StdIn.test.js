@@ -1,8 +1,9 @@
-var StreamStash = require('../../')
-  , StdIn = StreamStash.inputs.StdIn
-  , EventContainer = StreamStash.EventContainer
-  , Logger = StreamStash.Logger
-  , EventEmitter = require('events').EventEmitter
+var StreamStash = require('../../'),
+    Readable = require('stream').Readable,
+    StdIn = StreamStash.inputs.StdIn,
+    EventContainer = StreamStash.EventContainer,
+    Logger = StreamStash.Logger,
+    EventEmitter = require('events').EventEmitter
 
 require('should')
 
@@ -105,14 +106,18 @@ describe('Input - StdIn', function () {
     })
 
     it('Should emit events after being told to start', function (done) {
-        var streamStash = new EventEmitter()
-          , stream = new EventEmitter()
-          , stdin = new StdIn({
+        var streamStash = new EventEmitter(),
+            stream = new EventEmitter()
+
+        stream.resume = function () {}
+
+        var stdin = new StdIn({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
               , stream: stream
             })
+
 
         stdin.on('event', function () {
             done()
@@ -125,7 +130,10 @@ describe('Input - StdIn', function () {
     it('Should not emit events after being told to stopInput', function (done) {
         var streamStash = new EventEmitter()
           , stream = new EventEmitter()
-          , stdin = new StdIn({
+
+        stream.resume = function () {}
+
+        var stdin = new StdIn({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -153,7 +161,10 @@ describe('Input - StdIn', function () {
             }
           , streamStash = new EventEmitter()
           , stream = new EventEmitter()
-          , stdin = new StdIn({
+
+        stream.resume = function () {}
+
+        var stdin = new StdIn({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: eventContainer
@@ -172,7 +183,10 @@ describe('Input - StdIn', function () {
     it('Should emit proper events', function (done) {
         var streamStash = new EventEmitter()
           , stream = new EventEmitter()
-          , stdin = new StdIn({
+
+        stream.resume = function () {}
+
+        var stdin = new StdIn({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -194,7 +208,10 @@ describe('Input - StdIn', function () {
     it('Should add provided fields to events', function (done) {
         var streamStash = new EventEmitter()
           , stream = new EventEmitter()
-          , stdin = new StdIn({
+
+        stream.resume = function () {}
+
+        var stdin = new StdIn({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -216,7 +233,10 @@ describe('Input - StdIn', function () {
     it('Should overwrite provided fields with built in events', function (done) {
         var streamStash = new EventEmitter()
           , stream = new EventEmitter()
-          , stdin = new StdIn({
+
+        stream.resume = function () {}
+
+        var stdin = new StdIn({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
