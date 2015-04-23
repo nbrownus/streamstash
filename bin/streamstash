@@ -136,23 +136,30 @@ var killTimeout = opts['kill_timeout']
 
 process.on('SIGINT', function () {
     logger.info('Got SIGINT, starting shutdown')
-    attempt_shutdown()
+    attempt_shutdown('SIGINT after shutdown request')
 })
 
 process.on('SIGTERM', function () {
     logger.info('Got SIGTERM, starting shutdown')
-    attempt_shutdown()
+    attempt_shutdown('SIGTERM after shutdown request')
 })
 
-function attempt_shutdown () {
+function attempt_shutdown (force) {
+    var forceKill = function (reason) {
+        logger.error('Forcefully exiting. ' + reason)
+        process.exit(1)
+    }
+
     if (killTimer) {
+        if (force) {
+            forceKill(force)
+        }
         return
     }
 
     killTimer = setTimeout(
         function () {
-            logger.error('Forcefully exiting after ' + killTimeout + ' seconds')
-            process.exit(1)
+            forceKill('Shutdown timeout after ' + killTimeout + ' seconds')
         }
       , killTimeout * 1000
     )
