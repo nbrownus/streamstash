@@ -30,13 +30,13 @@
         "test": "make test"
     }
   , "dependencies": {
-        "dashdash": "1.4.0"
-      , "underscore": "1.5.2"
+        "dashdash": "1.10.1"
+      , "underscore": "1.8.3"
       , "relp": "git://github.com/nbrownus/node-relp"
     }
   , "devDependencies": {
-        "istanbul": "0.2.x"
+        "istanbul": "0.4.x"
       , "ppunit": "x"
-      , "should": "2.x"
+      , "should": "7.1.x"
     }
 }
