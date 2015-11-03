@@ -1,3 +1,10 @@
+/**
+ * Takes input from rsyslog via the omrelp output plugin and outputs event objects to elasticsearch
+ *
+ * This example parses customized nginx combined access logs and json parses any log message starting
+ * with `@json:`
+ */
+
 var util = require('util')
   , nginxRegex = new RegExp('^(nginx(?!-error)|lb..[ab])')
   , CombinedAccess = require('../').codecs.CombinedAccess

@@ -1,3 +1,12 @@
+/**
+ * Takes input from stdin and outputs event objects to stdout
+ *
+ * Try it by running
+ *
+ *      ./bin/streamstash examples/relp_basic.js
+ *
+ * Type a message and hit enter
+ */
 
 addInputPlugin('stdin')
 
