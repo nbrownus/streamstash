@@ -1,6 +1,6 @@
 {
     "name": "streamstash"
-  , "version": "0.0.1"
+  , "version": "1.0.0"
   , "description": "A log aggregating/filtering/redirecting service"
   , "keywords": [
         "log"
@@ -24,7 +24,7 @@
   , "main": "./index"
   , "license": "MIT"
   , "engines": {
-        "node": ">= 0.8.x"
+        "node": ">= 0.10.x"
     }
   , "scripts": {
         "test": "make test"
