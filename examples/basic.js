@@ -7,27 +7,32 @@
  *
  * Type a message and hit enter
  */
+var util = require('util')
 
 addInputPlugin('stdin')
 
 addOutputPlugin('stdout')
 
 addFilter(function (event) {
-    event.data.filter1 = true
+    var data
 
-    if (event.data.message == 'done') {
-        return event.done()
+    try {
+        data = JSON.parse(event.data.message)
+        event.data = util._extend(event.data, data)
+        event.data.message = event.data['@message']
+        delete event.data.originalMessage
+
+    } catch (error) {
+        event.data['@type'] = 'unparsable'
     }
+
+    event.data.filter1 = true
 
     event.next()
 })
 
 addFilter(function (event) {
     event.data.filter2 = true
-
-    if (event.data.message == 'cancel') {
-        return event.cancel()
-    }
 
     event.next()
 })
