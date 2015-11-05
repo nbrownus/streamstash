@@ -26,6 +26,13 @@ var optParser = new dashdash.Parser({
             type: 'number',
             default: 30,
             help: 'The amount of time to wait for a shutdown before forcing an exit, default 30 seconds'
+        },
+        {
+            names: ['log-level', 'l'],
+            type: 'string',
+            help: 'Set the minimum log level to output; debug, info, error, or off. Defaults to info.',
+            helpArg: 'LEVEL',
+            default: 'info'
         }
     ]
 })
@@ -56,7 +63,13 @@ if (opts.help) {
     printHelp()
 }
 
-var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO }),
+var levelName = opts['log_level'].toUpperCase()
+
+if (!StreamStash.Logger.LEVEL.hasOwnProperty(levelName)) {
+    printHelp('Invalid log level `' + opts['log_level'] + '`')
+}
+
+var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL[levelName] }),
     streamStash = new StreamStash({ logger: logger })
 
 // Build up our globals, helpers for basic usage of StreamStash
