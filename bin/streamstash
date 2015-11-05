@@ -36,7 +36,7 @@ Object.keys(StreamStash.inputs).forEach(function (plugin) {
         console.error(plugin + " did not have a basename, ignoring")
     }
 
-    plugins.inputs[StreamStash.inputs[plugin].NAME] = StreamStash.inputs[plugin]
+    plugins.inputs[StreamStash.inputs[plugin].NAME.toLowerCase()] = StreamStash.inputs[plugin]
 })
 
 Object.keys(StreamStash.outputs).forEach(function (plugin) {
@@ -44,7 +44,7 @@ Object.keys(StreamStash.outputs).forEach(function (plugin) {
         console.error(plugin + " did not have a basename, ignoring")
     }
 
-    plugins.outputs[StreamStash.outputs[plugin].NAME] = StreamStash.outputs[plugin]
+    plugins.outputs[StreamStash.outputs[plugin].NAME.toLowerCase()] = StreamStash.outputs[plugin]
 })
 
 try {

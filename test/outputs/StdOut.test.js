@@ -1,15 +1,15 @@
 var StreamStash = require('../../')
-  , StdOut = StreamStash.outputs.StdOut
+  , StdOutOutput = StreamStash.outputs.StdOutOutput
   , EventContainer = StreamStash.EventContainer
   , Logger = StreamStash.Logger
   , EventEmitter = require('events').EventEmitter
 
 require('should')
 
-describe('Output - StdOut', function () {
+describe('StdOutOutput', function () {
     it('Should use the provided streamStash object', function () {
         var streamStash = new EventEmitter()
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger() })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger() })
 
         streamStash.listeners('start').length.should.equal(1)
     })
@@ -22,16 +22,16 @@ describe('Output - StdOut', function () {
                     arguments[1].should.equal('starting up', 'message was wrong')
                 }
             }
-          , stdout = new StdOut({ streamStash: streamStash, logger: logger })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: logger })
     })
 
     it('Should default the name to `StdOut`', function () {
-        var stdout = new StdOut({ streamStash: new EventEmitter(), logger: new Logger() })
+        var stdout = new StdOutOutput({ streamStash: new EventEmitter(), logger: new Logger() })
         stdout.name.should.equal('StdOut', 'Default name was wrong')
     })
 
     it('Should use the provided name', function () {
-        var stdout = new StdOut({ streamStash: new EventEmitter(), logger: new Logger(), name: 'hey' })
+        var stdout = new StdOutOutput({ streamStash: new EventEmitter(), logger: new Logger(), name: 'hey' })
         stdout.name.should.equal('hey', 'name was wrong')
     })
 
@@ -42,7 +42,7 @@ describe('Output - StdOut', function () {
                     done(new Error('Output an event'))
                 }
             }
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger(), stream: stream })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger(), stream: stream })
 
         streamStash.emit('output', new EventContainer())
         done()
@@ -50,7 +50,7 @@ describe('Output - StdOut', function () {
 
     it('Should emit `started` after being told to start', function (done) {
         var streamStash = new EventEmitter()
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger() })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger() })
 
         stdout.on('started', function () {
             done()
@@ -61,7 +61,7 @@ describe('Output - StdOut', function () {
 
     it('Should emit `stopped` after being told to stop', function (done) {
         var streamStash = new EventEmitter()
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger() })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger() })
 
         stdout.on('stopped', function () {
             done()
@@ -79,7 +79,7 @@ describe('Output - StdOut', function () {
                     done()
                 }
             }
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger(), stream: stream })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger(), stream: stream })
 
         streamStash.emit('start')
         streamStash.emit('output', new EventContainer())
@@ -88,7 +88,7 @@ describe('Output - StdOut', function () {
     it('Should emit `complete` after outputting events', function (done) {
         var streamStash = new EventEmitter()
           , stream = { write: function () {} }
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger(), stream: stream })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger(), stream: stream })
 
         stdout.on('complete', function (event) {
             event.should.equal('yay')
@@ -108,7 +108,7 @@ describe('Output - StdOut', function () {
                     done()
                 }
             }
-          , stdout = new StdOut({
+          , stdout = new StdOutOutput({
                 streamStash: streamStash
               , logger: new Logger()
               , stream: stream
@@ -130,7 +130,7 @@ describe('Output - StdOut', function () {
                     done()
                 }
             }
-          , stdout = new StdOut({
+          , stdout = new StdOutOutput({
                 streamStash: streamStash
               , logger: new Logger()
               , stream: stream
@@ -153,7 +153,7 @@ describe('Output - StdOut', function () {
                     done()
                 }
             }
-          , stdout = new StdOut({
+          , stdout = new StdOutOutput({
                 streamStash: streamStash
               , logger: new Logger()
               , stream: stream
@@ -167,7 +167,7 @@ describe('Output - StdOut', function () {
     it('Should stop outputting events when told to stop', function (done) {
         var streamStash = new EventEmitter()
           , stream = { write: function () {} }
-          , stdout = new StdOut({ streamStash: streamStash, logger: new Logger(), stream: stream })
+          , stdout = new StdOutOutput({ streamStash: streamStash, logger: new Logger(), stream: stream })
 
         stdout.on('complete', function () {
             done(new Error('Should not have output the event'))
