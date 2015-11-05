@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: StreamStash.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: StreamStash.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var util = require('util')
+  , EventContainer = require('./EventContainer')
+  , EventEmitter = require('events').EventEmitter
+
+//TODO: setInterval on shutdown to give info on how many events/plugins we are waiting on
+//TODO: need logs for stoppingInput and stopped plugin events
+//TODO: need started event to fire after all plugins have started
+//TODO: review log levels
+
+/**
+ * Coordinates events from input plugins to filters and finally output plugins
+ *
+ * @param {Object} options Configuration parameters
+ * @param {Logger} options.logger The logger object to use for outputting logs
+ *
+ * @constructor
+ */
+var StreamStash = function (options) {
+    StreamStash.super_.call(this)
+
+    var self = this
+
+    self.setMaxListeners(0)
+    self.state = StreamStash.STATE.CONFIGURING
+
+    self.logger = options.logger
+
+    self.inputs = []
+    self.filters = []
+    self.outputs = []
+
+    self.stats = {
+        startTime: null
+      , events: {
+            processing: 0
+          , total: 0
+        }
+      , plugins: {
+            started: 0
+          , stoppedInput: 0
+          , stopped: 0
+          , total: 0
+        }
+    }
+
+}
+
+util.inherits(StreamStash, EventEmitter)
+module.exports = StreamStash
+
+/**
+ * All the states StreamStash can be in
+ * - CONFIGURING: Instantiated and ready for input/output plugins and filters to be added
+ * - STARTED: Configured and ready to process events
+ * - STOPPING_INPUT: Beginning to shutdown, all input plugins should not be emitting events anymore
+ * - STOPPING_ALL: All inputs have stopped emitting events, waiting for in flight events and plugins to complete
+ * - STOPPED: All events and plugins have completed, we are stopped
+ *
+ * @type {Object}
+ */
+StreamStash.STATE = {
+    CONFIGURING: 0
+  , STARTED: 1
+  , STOPPING_INPUT: 2
+  , STOPPING_ALL: 3
+  , STOPPED: 4
+}
+
+/**
+ * Adds an input plugin to provide events
+ *
+ * @param {Object} plugin An already instantiated input plugin
+ *
+ * @returns {boolean} True if the plugin was added, false if not allowed
+ */
+StreamStash.prototype.addInputPlugin = function (plugin) {
+    var self = this
+
+    if (self.state !== StreamStash.STATE.CONFIGURING) {
+        return false
+    }
+
+    if (plugin.hasOwnProperty('name') === false) {
+        throw new Error('Input plugin did not have a name')
+    }
+
+    if (self._uniqueName(self.inputs, plugin) === false) {
+        throw new Error('Each input plugin must have a unique name', plugin.name)
+    }
+
+    plugin.once('started', function () {
+        self.logger.info(plugin.name, 'started')
+        self.stats.plugins.started++
+    })
+
+    plugin.on('event', function (eventContainer) {
+        self._handleInputEvent(plugin, eventContainer)
+    })
+
+    plugin.pluginId = self.inputs.push(plugin) - 1
+    self.stats.plugins.total++
+
+    return true
+}
+
+/**
+ * Adds a filter function to use for events
+ * TODO: Allow naming filters?
+ * TODO: Document what is given to the filter functions
+ *
+ * @param {Function} func The function to use for this filter
+ *
+ * @returns {boolean} True if the filter was added, false if not allowed
+ */
+StreamStash.prototype.addFilter = function (func) {
+    if (this.state !== StreamStash.STATE.CONFIGURING) {
+        return false
+    }
+
+    if (typeof func !== 'function') {
+        throw new Error('Attempted to add a filter that is not a function')
+    }
+
+    this.filters.forEach(function (filter) {
+        if (filter === func) {
+            throw new Error('Attempted to add the same filter more than once')
+        }
+    })
+
+    this.filters.push(func)
+    return true
+}
+
+/**
+ * Adds an output plugin to use for events
+ *
+ * @param {Object} plugin An already instantiated output plugin
+ *
+ * @returns {boolean} True if the plugin was added, false if not allowed
+ */
+StreamStash.prototype.addOutputPlugin = function (plugin) {
+    var self = this
+
+    if (self.state !== StreamStash.STATE.CONFIGURING) {
+        return false
+    }
+
+    if (plugin.hasOwnProperty('name') === false) {
+        throw new Error('Input plugin did not have a name')
+    }
+
+    if (self._uniqueName(self.outputs, plugin) === false) {
+        throw new Error('Each output plugin must have a unique name', plugin.name)
+    }
+
+    plugin.once('started', function () {
+        self.logger.info(plugin.name, 'started')
+        self.stats.plugins.started++
+    })
+
+    plugin.on('complete', function (eventContainer) {
+        self._handleOutputComplete(plugin, eventContainer)
+    })
+
+    plugin.pluginId = self.outputs.push(plugin) - 1
+    self.stats.plugins.total++
+
+    return true
+}
+
+/**
+ * Starts processing events
+ * At least 1 input and 1 output must be configured
+ *
+ * @returns {boolean} True if started, false if already started or shutting down
+ *
+ * @fires StreamStash#start
+ */
+StreamStash.prototype.start = function () {
+    if (this.state !== StreamStash.STATE.CONFIGURING) {
+        return false
+    }
+
+    if (this.inputs.length === 0) {
+        throw new Error('At least 1 input plugin must be configured')
+    }
+
+    if (this.outputs.length === 0) {
+        throw new Error('At least 1 output plugin must be configured')
+    }
+
+    this.logger.info('Starting!')
+    this.state = StreamStash.STATE.STARTED
+    this.stats.startTime = new Date()
+
+    this.emit('start')
+    return true
+}
+
+/**
+ * Kicks off the stop sequence
+ * Use this to shutdown gracefully
+ *
+ * @returns {boolean} True if the stop has begun, false if not allowed
+ */
+StreamStash.prototype.stop = function () {
+    if (this.state !== StreamStash.STATE.STARTED) {
+        return false
+    }
+
+    var self = this
+
+    var waitStop = function (plugin) {
+        plugin.once('stopped', function () {
+            self.stats.plugins.stopped++
+
+            if (self.stats.plugins.stopped === self.stats.plugins.total) {
+                //TODO: need to make sure all in flights have completed
+                self.logger.info('All plugins have completely stopped')
+                self.state = StreamStash.STATE.STOPPED
+                self.emit('stopped')
+            }
+        })
+    }
+
+    self.inputs.forEach(function (input) {
+        input.once('stoppedInput', function () {
+            self.stats.plugins.stoppedInput++
+
+            if (self.stats.plugins.stoppedInput === self.inputs.length) {
+                self.logger.info('All input plugins have stopped emitting')
+                self.logger.info('Waiting for', self.stats.events.processing, 'in flight events to complete')
+                self._attemptStop()
+            }
+        })
+
+        waitStop(input)
+    })
+
+    self.outputs.forEach(waitStop)
+
+    self.logger.info('Telling all input plugins to stop emitting')
+    self.state = StreamStash.STATE.STOPPING_INPUT
+    this.emit('stopInput')
+    return true
+}
+
+/**
+ * Starts an event moving through filters after being received from an input plugin
+ *
+ * @param {Object} plugin The plugin that provided the event
+ * @param {EventContainer} eventContainer The newly received event
+ *
+ * @returns {boolean} True if the event was taken, false if not ready for events
+ *
+ * @private
+ */
+StreamStash.prototype._handleInputEvent = function (plugin, eventContainer) {
+    if (this.state !== StreamStash.STATE.STARTED &amp;&amp; this.state !== StreamStash.STATE.STOPPING_INPUT) {
+        this.logger.info('Dropping event from', eventContainer.data.source)
+        return false
+    }
+
+    if (!eventContainer.data.hasOwnProperty('source')) {
+        this.logger.error('Event received from', plugin.name, 'has no source property')
+    }
+
+    if (!eventContainer.data.hasOwnProperty('message')) {
+        this.logger.error('Event received from', plugin.name, 'has no message property')
+    }
+
+    if (!eventContainer.data.hasOwnProperty('timestamp')) {
+        this.logger.error('Event received from', plugin.name, 'has no timestamp property')
+    }
+
+    this.stats.events.processing++
+
+    eventContainer._pluginsLeft = this.outputs.length
+    eventContainer.eventId = this.stats.events.total++
+
+    this._doFilter(0, eventContainer)
+    return true
+}
+
+/**
+ * Runs an event through the supplied filters
+ * Sets up EventContainer#next, EventContainer#done, and EventContainer#cancel for each filter
+ *
+ * @param {Number} index Index of the filter to call, if it does not exist the event is moved to output plugins
+ * @param {EventContainer} eventContainer The event to run through the filters
+ *
+ * @private
+ */
+StreamStash.prototype._doFilter = function (index, eventContainer) {
+    var self = this
+      , nexted = false
+      , doned = false
+      , canceled = false
+
+    //No more filters, go to output
+    if (!self.filters[index]) {
+        return self._handleOutputEvent(eventContainer)
+    }
+
+    /**
+     * Makes sure the event hasn't already progressed out of the current filter
+     *
+     * @returns {boolean} False if the filter has already acted, true if not
+     */
+    var canAct = function () {
+        if (nexted) {
+            self.logger.error('Filter', index, 'tried to call `next` on an event that has already progressed')
+            self.logger.info(eventContainer)
+            return false
+        }
+
+        if (doned) {
+            self.logger.error('Filter', index, 'tried to call `done` on an event that has already progressed')
+            self.logger.info(eventContainer)
+            return false
+        }
+
+
+        if (canceled) {
+            self.logger.error('Filter', index, 'tried to call `cancel` on an event that has already progressed')
+            self.logger.info(eventContainer)
+            return false
+        }
+
+        return true
+    }
+
+    eventContainer.next = function () {
+        if (!canAct()) {
+            return
+        }
+
+        nexted = true
+        self._doFilter(index + 1, eventContainer)
+    }
+
+    eventContainer.done = function () {
+        if (!canAct()) {
+            return
+        }
+
+        doned = true
+        self._handleOutputEvent(eventContainer)
+    }
+
+    eventContainer.cancel = function () {
+        if (!canAct()) {
+            return
+        }
+
+        canceled = true
+        self._handleProcessingComplete(eventContainer, true)
+    }
+
+    self.filters[index](eventContainer)
+}
+
+/**
+ * Sends an event to the output plugins for processing
+ *
+ * @param {EventContainer} eventContainer The event to output
+ *
+ * @private
+ */
+StreamStash.prototype._handleOutputEvent = function (eventContainer) {
+    this.logger.debug('Beginning output for event', eventContainer.eventId)
+    this.emit('output', eventContainer)
+}
+
+/**
+ * Handles an output plugin that completed outputting an event
+ *
+ * @param {Object} output The output plugin that completed an event
+ * @param {EventContainer|EventContainer[]} eventContainers An event or array of events that were output
+ *
+ * @private
+ */
+StreamStash.prototype._handleOutputComplete = function (output, eventContainers) {
+    var self = this,
+        events = (Array.isArray(eventContainers)) ? eventContainers : [eventContainers],
+        completed = []
+
+    for (var i = 0, len = events.length; i &lt; len; i++) {
+        var eventContainer = events[i]
+        if (eventContainer._plugins[output.pluginId]) {
+            self.logger.error('Output plugin', output.name, 'completed the same event twice')
+            return
+        }
+
+        eventContainer._plugins[output.name] = true
+        eventContainer._pluginsLeft--
+
+        self.logger.debug(output.name, 'completed output.', eventContainer._pluginsLeft, 'plugins left')
+        if (eventContainer._pluginsLeft === 0) {
+            completed.push(eventContainer)
+        }
+    }
+
+    self._handleProcessingComplete(completed, false)
+}
+
+/**
+ * Handles completing an event entirely
+ * The event may have been canceled
+ *
+ * @param {EventContainer|EventContainer[]} eventContainers An event or array of events that have finished processing
+ * @param {Boolean} canceled True if the event(s) were canceled, false if not
+ *      TODO: Indicate canceled on the event instead of here!
+ *
+ * @private
+ */
+StreamStash.prototype._handleProcessingComplete = function (eventContainers, canceled) {
+    var self = this,
+        events = (Array.isArray(eventContainers)) ? eventContainers : [eventContainers]
+
+    for (var i = 0, len = events.length; i &lt; len; i++) {
+        var eventContainer = events[i]
+
+        if (!eventContainer.processingComplete(canceled)) {
+            self.logger.error(
+                'Could not complete processing for event', eventContainer.eventId, 'because it was previously completed'
+            )
+            return
+        }
+
+        self.logger.debug('Event', eventContainer.eventId, 'processing', canceled ? 'canceled' : 'completed')
+    }
+
+    self.stats.events.processing -= events.length
+
+    //TODO: just make this a timer?
+    if (self.state === StreamStash.STATE.STOPPING_INPUT) {
+        self._attemptStop()
+    }
+}
+
+/**
+ * Attempts to emit `stop`
+ * Can only succeed if all in flight events have completed
+ *
+ * @private
+ */
+StreamStash.prototype._attemptStop = function () {
+    if (this.stats.events.processing === 0) {
+        this.logger.info('All in flight events have completed')
+        this.logger.info('Stopping all', this.stats.plugins.total, 'plugins')
+        this.state = StreamStash.STATE.STOPPING_ALL
+        this.emit('stop')
+    }
+}
+
+/**
+ * Checks if a plugin has a unique name
+ *
+ * @param {Object} currentPlugins Object containing the plugins to check the name against against
+ * @param {Object} testPlugin The plugin to test the existing names against
+ *
+ * @returns {boolean} False if not unique, true if unique
+ *
+ * @private
+ */
+StreamStash.prototype._uniqueName = function (currentPlugins, testPlugin) {
+    var unique = true
+
+    currentPlugins.some(function (plugin) {
+        if (plugin.name.toLowerCase() == testPlugin.name.toLowerCase()) {
+            unique = false
+            return true
+        }
+    })
+
+    return unique
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseInput.html">BaseInput</a></li><li><a href="ElasticSearch.html">ElasticSearch</a></li><li><a href="EventContainer.html">EventContainer</a></li><li><a href="Logger.html">Logger</a></li><li><a href="RELPInput.html">RELPInput</a></li><li><a href="Socket.html">Socket</a></li><li><a href="StdInInput.html">StdInInput</a></li><li><a href="StdOut.html">StdOut</a></li><li><a href="StreamStash.html">StreamStash</a></li><li><a href="TCPInput.html">TCPInput</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Wed Nov 04 2015 17:23:55 GMT-0800 (PST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
