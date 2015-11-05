@@ -1,32 +1,31 @@
 #!/usr/bin/env node
 
-var StreamStash = require('../')
-  , util = require('util')
-  , path = require('path')
-  , fs = require('fs')
-  , dashdash = require('dashdash')
-  , plugins = {
-        inputs: {}
-      , outputs: {}
+var StreamStash = require('../'),
+    util = require('util'),
+    path = require('path'),
+    fs = require('fs'),
+    dashdash = require('dashdash'),
+    plugins = {
+        inputs: {},
+        outputs: {}
     }
 
 //TODO: We had -v[vv]
-//TODO: Add a thing to print build in plugins
 
 //process.stdin.resume()
 
 var optParser = new dashdash.Parser({
     options: [
         {
-            names: ['help', 'h']
-          , type: 'bool'
-          , help: 'Print this help and exit'
-        }
-      , {
-            names: ['kill-timeout', 'k']
-          , type: 'number'
-          , default: 30
-          , help: 'The amount of time to wait for a shutdown before forcing an exit, default 30 seconds'
+            names: ['help', 'h'],
+            type: 'bool',
+            help: 'Print this help and exit'
+        },
+        {
+            names: ['kill-timeout', 'k'],
+            type: 'number',
+            default: 30,
+            help: 'The amount of time to wait for a shutdown before forcing an exit, default 30 seconds'
         }
     ]
 })
@@ -82,11 +81,11 @@ global.addFilter = function (func) {
  * @param {Object} [options] Configuration options for the plugin, refer to the plugin for more information
  */
 global.addInputPlugin = function (name, options) {
-    var ctor = loadPlugin('inputs', name)
-        , baseOptions = {
-            streamStash: streamStash
-          , EventContainer: StreamStash.EventContainer
-          , logger: logger
+    var ctor = loadPlugin('inputs', name),
+        baseOptions = {
+            streamStash: streamStash,
+            EventContainer: StreamStash.EventContainer,
+            logger: logger
         }
 
     streamStash.addInputPlugin(new ctor(util._extend(baseOptions, options)))
@@ -99,19 +98,19 @@ global.addInputPlugin = function (name, options) {
  * @param {Object} [options] Configuration options for the plugin, refer to the plugin for more information
  */
 global.addOutputPlugin = function (name, options) {
-    var ctor = loadPlugin('outputs', name)
-      , baseOptions = {
-            streamStash: streamStash
-          , logger: logger
+    var ctor = loadPlugin('outputs', name),
+        baseOptions = {
+            streamStash: streamStash,
+            logger: logger
         }
 
     streamStash.addOutputPlugin(new ctor(util._extend(baseOptions, options)))
 }
 
 // Setup config files
-var configPaths = opts._args
-  , files = []
-  , pathRegex = new RegExp('\\.js$')
+var configPaths = opts._args,
+    files = [],
+    pathRegex = new RegExp('\\.js$')
 
 try {
     configPaths.forEach(function (testPath) {
@@ -139,20 +138,20 @@ files.forEach(function (filePath) {
 })
 
 // Set up a signal handler for SIGINT to gracefully shutdown
-var killTimeout = opts['kill_timeout']
-  , killTimer = false
+var killTimeout = opts['kill_timeout'],
+    killTimer = false
 
 process.on('SIGINT', function () {
     logger.info('Got SIGINT, starting shutdown')
-    attempt_shutdown('SIGINT after shutdown request')
+    attemptShutdown('SIGINT after shutdown request')
 })
 
 process.on('SIGTERM', function () {
     logger.info('Got SIGTERM, starting shutdown')
-    attempt_shutdown('SIGTERM after shutdown request')
+    attemptShutdown('SIGTERM after shutdown request')
 })
 
-function attempt_shutdown (force) {
+function attemptShutdown (force) {
     var forceKill = function (reason) {
         logger.error('Forcefully exiting. ' + reason)
         process.exit(1)
@@ -168,8 +167,8 @@ function attempt_shutdown (force) {
     killTimer = setTimeout(
         function () {
             forceKill('Shutdown timeout after ' + killTimeout + ' seconds')
-        }
-      , killTimeout * 1000
+        },
+        killTimeout * 1000
     )
 
     logger.info('Forceful exit in ' + killTimeout + ' seconds')
@@ -186,14 +185,14 @@ streamStash.once('stopped', function () {
 // Start it up
 streamStash.start()
 
-var lastTotal = 0
-  , perSec = 0
-  , maxPerSec = 0
+var lastTotal = 0,
+    perSec = 0,
+    maxPerSec = 0
 
 process.on('uncaughtException', function (error) {
     logger.error('Uncaught exception, shutting down:')
     logger.error(error.stack || error)
-    attempt_shutdown()
+    attemptShutdown()
 })
 
 setInterval(function () {
@@ -224,14 +223,14 @@ setInterval(function () {
  * @returns {Function} A constructor for the plugin
  */
 function loadPlugin (type, name) {
-    var ctor
-      , useName = name.toLowerCase()
+    var ctor,
+        useName = name.toLowerCase()
 
     //If we got a function in the first place, use it
     if (typeof name === 'function') {
         return name
 
-    //Look for our own reporter first
+    //Look for our own plugin first
     } else if (plugins[type][useName]) {
         ctor = plugins[type][useName]
 
@@ -255,8 +254,8 @@ function loadPlugin (type, name) {
  * @returns {Array.<String>} An array of files found within filePath
  */
 function lookupFiles (filePath) {
-    var found = []
-      , useFilePath = fs.existsSync(filePath) ? filePath : filePath + '.js'
+    var found = [],
+        useFilePath = fs.existsSync(filePath) ? filePath : filePath + '.js'
 
     var stat = fs.statSync(useFilePath)
     if (stat.isFile()) {
@@ -264,8 +263,8 @@ function lookupFiles (filePath) {
     }
 
     fs.readdirSync(useFilePath).forEach(function (file) {
-        var useFile = path.join(useFilePath, file)
-          , stat = fs.statSync(useFile)
+        var useFile = path.join(useFilePath, file),
+            stat = fs.statSync(useFile)
 
         if (stat.isDirectory()) {
             found = found.concat(lookupFiles(useFile))
