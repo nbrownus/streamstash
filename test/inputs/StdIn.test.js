@@ -1,17 +1,17 @@
 var StreamStash = require('../../'),
     Readable = require('stream').Readable,
-    StdIn = StreamStash.inputs.StdIn,
+    StdInInput = StreamStash.inputs.StdInInput,
     EventContainer = StreamStash.EventContainer,
     Logger = StreamStash.Logger,
     EventEmitter = require('events').EventEmitter
 
 require('should')
 
-describe('Input - StdIn', function () {
+describe('StdInInput', function () {
 
     it('Should use the provided streamStash object', function () {
         var streamStash = new EventEmitter()
-          , stdin = new StdIn({ streamStash: streamStash, logger: new Logger() })
+          , stdin = new StdInInput({ streamStash: streamStash, logger: new Logger() })
 
         streamStash.listeners('start').length.should.equal(1)
     })
@@ -24,22 +24,22 @@ describe('Input - StdIn', function () {
                     arguments[1].should.equal('starting up', 'message was wrong')
                 }
             }
-          , stdin = new StdIn({ streamStash: streamStash, logger: logger })
+          , stdin = new StdInInput({ streamStash: streamStash, logger: logger })
     })
 
     it('Should default the name to `StdIn`', function () {
-        var stdin = new StdIn({ streamStash: new EventEmitter(), logger: new Logger() })
+        var stdin = new StdInInput({ streamStash: new EventEmitter(), logger: new Logger() })
         stdin.name.should.equal('StdIn', 'Default name was wrong')
     })
 
     it('Should use the provided name', function () {
-        var stdin = new StdIn({ streamStash: new EventEmitter(), logger: new Logger(), name: 'hey' })
+        var stdin = new StdInInput({ streamStash: new EventEmitter(), logger: new Logger(), name: 'hey' })
         stdin.name.should.equal('hey', 'name was wrong')
     })
 
     it('Should not emit events if not told to start', function (done) {
         var stream = new EventEmitter()
-          , stdin = new StdIn({
+          , stdin = new StdInInput({
                 streamStash: new EventEmitter()
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -59,7 +59,7 @@ describe('Input - StdIn', function () {
 
     it('Should emit `started` after being told to start', function (done) {
         var streamStash = new EventEmitter()
-          , stdin = new StdIn({
+          , stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -74,7 +74,7 @@ describe('Input - StdIn', function () {
 
     it('Should emit `stoppedInput` after being told to stop input', function (done) {
         var streamStash = new EventEmitter()
-          , stdin = new StdIn({
+          , stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -90,7 +90,7 @@ describe('Input - StdIn', function () {
 
     it('Should emit `stopped` after being told to stop', function (done) {
         var streamStash = new EventEmitter()
-          , stdin = new StdIn({
+          , stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -111,7 +111,7 @@ describe('Input - StdIn', function () {
 
         stream.resume = function () {}
 
-        var stdin = new StdIn({
+        var stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -133,7 +133,7 @@ describe('Input - StdIn', function () {
 
         stream.resume = function () {}
 
-        var stdin = new StdIn({
+        var stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -164,7 +164,7 @@ describe('Input - StdIn', function () {
 
         stream.resume = function () {}
 
-        var stdin = new StdIn({
+        var stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: eventContainer
@@ -186,7 +186,7 @@ describe('Input - StdIn', function () {
 
         stream.resume = function () {}
 
-        var stdin = new StdIn({
+        var stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -211,7 +211,7 @@ describe('Input - StdIn', function () {
 
         stream.resume = function () {}
 
-        var stdin = new StdIn({
+        var stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer
@@ -236,7 +236,7 @@ describe('Input - StdIn', function () {
 
         stream.resume = function () {}
 
-        var stdin = new StdIn({
+        var stdin = new StdInInput({
                 streamStash: streamStash
               , logger: new Logger()
               , EventContainer: EventContainer

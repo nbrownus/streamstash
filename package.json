@@ -38,5 +38,6 @@
         "istanbul": "0.4.x"
       , "ppunit": "x"
       , "should": "7.1.x"
+      , "jsdoc": "3.3.3"
     }
 }

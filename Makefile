@@ -16,4 +16,8 @@ test-cov-html:
 	@echo "Results: file://$$PWD/coverage/lcov-report/index.html"
 	@echo "****************************************************************************************"
 
-.PHONY: all test test-cov test-cov-html
+docs:
+	rm -rf ./docs
+	node_modules/jsdoc/jsdoc.js -r -d docs ./lib
+
+.PHONY: all test test-cov test-cov-html docs

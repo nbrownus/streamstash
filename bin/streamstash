@@ -31,6 +31,22 @@ var optParser = new dashdash.Parser({
     ]
 })
 
+Object.keys(StreamStash.inputs).forEach(function (plugin) {
+    if (!StreamStash.inputs[plugin].NAME) {
+        console.error(plugin + " did not have a basename, ignoring")
+    }
+
+    plugins.inputs[StreamStash.inputs[plugin].NAME] = StreamStash.inputs[plugin]
+})
+
+Object.keys(StreamStash.outputs).forEach(function (plugin) {
+    if (!StreamStash.outputs[plugin].NAME) {
+        console.error(plugin + " did not have a basename, ignoring")
+    }
+
+    plugins.outputs[StreamStash.outputs[plugin].NAME] = StreamStash.outputs[plugin]
+})
+
 try {
     var opts = optParser.parse(process.argv)
 } catch (error) {
@@ -41,16 +57,8 @@ if (opts.help) {
     printHelp()
 }
 
-Object.keys(StreamStash.inputs).forEach(function (plugin) {
-    plugins.inputs[plugin.toLowerCase()] = StreamStash.inputs[plugin]
-})
-
-Object.keys(StreamStash.outputs).forEach(function (plugin) {
-    plugins.outputs[plugin.toLowerCase()] = StreamStash.outputs[plugin]
-})
-
-var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO })
-  , streamStash = new StreamStash({ logger: logger })
+var logger = new StreamStash.Logger({ level: StreamStash.Logger.LEVEL.INFO }),
+    streamStash = new StreamStash({ logger: logger })
 
 // Build up our globals, helpers for basic usage of StreamStash
 global.StreamStash = StreamStash
@@ -280,7 +288,9 @@ function lookupFiles (filePath) {
  * @param {String} [error] An error message to print before the help
  */
 function printHelp (error) {
-    var status = 0
+    var status = 0,
+        name,
+        plugin
 
     console.log()
 
@@ -294,6 +304,18 @@ function printHelp (error) {
     console.log('Usage: streamstash [OPTIONS] [<config file or directory>...]\n')
     console.log('Options:')
     console.log(optParser.help({ includeEnv: true, maxCol: width }).trimRight())
+
+    console.log('\nKnown input plugins')
+    for (name in plugins.inputs) {
+        plugin = plugins.inputs[name]
+        console.log('    ' + plugin.NAME + ' - ' + plugin.DESCRIPTION)
+    }
+
+    console.log('\nKnown output plugins')
+    for (name in plugins.outputs) {
+        plugin = plugins.outputs[name]
+        console.log('    ' + plugin.NAME + ' - ' + plugin.DESCRIPTION)
+    }
 
     process.exit(status)
 }
