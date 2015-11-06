@@ -5,6 +5,7 @@ var StreamStash = require('../'),
     path = require('path'),
     fs = require('fs'),
     dashdash = require('dashdash'),
+    StatsDClient = require('statsd-client'),
     plugins = {
         inputs: {},
         outputs: {}
@@ -120,6 +121,25 @@ global.addOutputPlugin = function (name, options) {
     streamStash.addOutputPlugin(new ctor(util._extend(baseOptions, options)))
 }
 
+/**
+ * Enables telemetry to be sent to a statsd compliant service
+ *
+ * @param {String} host The host to send telemetry to, can also be `http://...` to send over http
+ * @param {Number} port The port to connect to the remote service on
+ * @param {String} [prefix=streamstash] Prefix to use for all stats
+ * @param {Boolean} [tcp=false] If true TCP will be used, if false UDP will be used
+ */
+global.telemetry = function (host, port, prefix, tcp) {
+    var statsdClient = new StatsDClient({
+        host: host,
+        port: port,
+        tcp: tcp,
+        prefix: prefix || 'streamstash'
+    })
+
+    streamStash.enableTelemetry(statsdClient)
+}
+
 // Setup config files
 var configPaths = opts._args,
     files = [],
@@ -207,25 +227,6 @@ process.on('uncaughtException', function (error) {
     logger.error(error.stack || error)
     attemptShutdown()
 })
-
-setInterval(function () {
-    perSec = (streamStash.stats.events.total - lastTotal)
-
-    if (perSec > maxPerSec) {
-        maxPerSec = perSec
-    }
-
-    lastTotal = streamStash.stats.events.total
-}, 1000)
-
-setInterval(function () {
-    logger.info(
-        'Processing: ' + streamStash.stats.events.processing
-            + ', Total: ' + streamStash.stats.events.total
-            + ', Current/s: ' + perSec + '/s'
-            + ', Max/s: ' + maxPerSec + '/s'
-    )
-}, 10000)
 
 /**
  * Tries to load a plugin

@@ -3,7 +3,7 @@
  *
  * Try it by running
  *
- *      ./bin/streamstash examples/basic.js
+ *      ./bin/streamstash examples/relp_basic.js
  *
  * Configure your rsyslog instance to talk us and restart
  *

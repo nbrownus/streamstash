@@ -3,7 +3,7 @@
  *
  * Try it by running
  *
- *      ./bin/streamstash examples/relp_basic.js
+ *      ./bin/streamstash examples/basic.js
  *
  * Type a message and hit enter
  */
