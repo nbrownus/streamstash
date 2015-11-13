@@ -171,47 +171,20 @@ files.forEach(function (filePath) {
 })
 
 // Set up a signal handler for SIGINT to gracefully shutdown
-var killTimeout = opts['kill_timeout'],
-    killTimer = false
+streamStash.killTimeout = opts['kill_timeout']
 
 process.on('SIGINT', function () {
     logger.info('Got SIGINT, starting shutdown')
-    attemptShutdown('SIGINT after shutdown request')
+    streamStash.shutdown('SIGINT after shutdown request')
 })
 
 process.on('SIGTERM', function () {
     logger.info('Got SIGTERM, starting shutdown')
-    attemptShutdown('SIGTERM after shutdown request')
+    streamStash.shutdown('SIGTERM after shutdown request')
 })
-
-function attemptShutdown (force) {
-    var forceKill = function (reason) {
-        logger.error('Forcefully exiting. ' + reason)
-        process.exit(1)
-    }
-
-    if (killTimer) {
-        if (force) {
-            forceKill(force)
-        }
-        return
-    }
-
-    killTimer = setTimeout(
-        function () {
-            forceKill('Shutdown timeout after ' + killTimeout + ' seconds')
-        },
-        killTimeout * 1000
-    )
-
-    logger.info('Forceful exit in ' + killTimeout + ' seconds')
-
-    streamStash.stop()
-}
 
 streamStash.once('stopped', function () {
     logger.info('Exited gracefully')
-    clearTimeout(killTimer)
     process.exit(0)
 })
 
@@ -223,9 +196,8 @@ var lastTotal = 0,
     maxPerSec = 0
 
 process.on('uncaughtException', function (error) {
-    logger.error('Uncaught exception, shutting down:')
     logger.error(error.stack || error)
-    attemptShutdown()
+    streamStash.shutdown('Uncaught exception occurred')
 })
 
 /**

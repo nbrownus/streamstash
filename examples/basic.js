@@ -9,6 +9,12 @@
  */
 var util = require('util')
 
+//Pause all inputs if the number of in process events exceeds the highWatermark
+streamStash.highWaterMark = 1000
+
+//Unpause all inputs after the number of in process events drops below lowWatermark
+streamStash.lowWatermark = 100
+
 addInputPlugin('stdin')
 
 addOutputPlugin('stdout')
