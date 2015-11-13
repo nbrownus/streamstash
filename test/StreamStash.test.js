@@ -58,6 +58,25 @@ describe('StreamStash', function () {
             )
         })
 
+        it('Should emit telemetry every 5 seconds', function (done) {
+            var streamStash = new StreamStash({ logger: new Logger(), telemetryInterval: 10 }),
+                seen = 0
+
+            streamStash.telemetry.gauge = function (metric) {
+                if (metric != 'events.processing' && metric != 'events.total') {
+                    throw new Error('Got a metric we did not expect')
+                }
+
+                seen++
+
+                //This is brittle and will miss added stats
+                if (seen == 2) {
+                    done()
+                }
+            }
+
+        })
+
     })
 
     describe('#addInputPlugin', function () {
@@ -322,5 +341,7 @@ describe('StreamStash', function () {
         it('Should properly stop once all plugins have stopped')
 
     })
+
+    it('Should emit filter timing stats').skip()
 
 })
