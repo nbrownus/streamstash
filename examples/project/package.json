@@ -1,0 +1,6 @@
+{
+    "name": "example-streamstash",
+    "dependencies": {
+        "streamstash": "1.x"
+    }
+}

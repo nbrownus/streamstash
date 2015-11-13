@@ -2,16 +2,25 @@
 
 ### StreamStash
 
-StreamStash is a log aggregating, filtering, redirecting service. A lightweight [Node.js](http://nodejs.org/)
+`streamstash` is a log aggregating, filtering, redirecting service. A lightweight [Node.js](http://nodejs.org/)
 alternative to projects like [logstash](http://logstash.net/), [flume](http://flume.apache.org/),
 [fluentd](http://fluentd.org/), etc.
 
+### Usage
+
+I typically setup a separate repo with my `config.js` and `package.json` that lists `streamstash` as a
+dependency. Deploy that repo to my servers and run `npm install`. The last step is to run `streamstash`
+
+    <PROJECT SOURCE DIR>/node_modules/streamstash/bin/streamstash <PROJECT SOURCE DIR>/config.js
+
+An example of this can be found [here](examples/project)
+
 ### Inputs
 
-Inputs are things that slurp event data from different places and provides them to StreamStash for filtering
+Inputs are things that slurp event data from different places and provides them to `streamstash` for filtering
 (by filters) and outputting (by outputs).
 
-Inputs packaged with StreamStash:
+Inputs packaged with `streamstash`:
 
 - RELP: Provides an easy and reliable integration with rsyslog. Uses [rsyslogs](http://www.rsyslog.com/) Reliable Event
     Logging Protocol. For more info see the [relp webpage](http://www.rsyslog.com/doc/relp.html)
@@ -35,17 +44,17 @@ Every event will contain the following properties in the data object:
 
 A simple filter example:
 
-    function (event) {
+    addFilter(function (event) {
         // Add a gotHere property to the event data
         event.data.gotHere = 'Yay!'
 
         // Allow the event to progress to the next filter or on to output plugins
         event.next()
-    }
+    })
 
 A little more advanced:
 
-    function (event) {
+    addFilter(function (event) {
         // Drop all events with a 'stupid event' message, these events will never see an output plugin
         if (event.data.message == 'stupid event') {
             // Be sure to return anytime you may continue processing the event to avoid weird issues
@@ -66,14 +75,16 @@ A little more advanced:
 
         // Since this is the last thing in the filter there is no need to return
         event.next()
-    }
+    })
 
 Remember, this is all pure Node.js. You can do any crazy exotic thing you want. Just remember that the more you do the
 slower each event is processed.
 
 ### Outputs
 
-Outputs packaged with StreamStash:
+Outputs are exactly what they sound like. The output an event to a place.
+
+Outputs packaged with `streamstash`:
 
 - `ElasticSearch`: Outputs event data to your [ElasticSearch](http://www.elasticsearch.org/overview) cluster.
     Works great with [kibana](http://www.elasticsearch.org/overview/kibana/)
@@ -81,19 +92,27 @@ Outputs packaged with StreamStash:
 
 Example usage can be found in the [examples folder](examples)
 
+### Telemetry
+
+If enabled, `streamstash` will output interesting stats to [statsite](https://github.com/armon/statsite),
+[statsd](https://github.com/etsy/statsd), or any other service that conforms to the `statsd` line protocol.
+
+General stats
+
+- `events.processing` A gauge of how many events are currently being processed 
+- `events.total` A gauge of how many events have been processed since the start of the current process
+- `filter.#` A timer of how long each event took in each filter. Typically a histogram is created from the
+    data so you can see p99, p95, mean, max, etc of the time spent in each filter.
+
+Some plugins may also emit stats.
+
+`RELP`
+
+- `<PLUGIN NAME>.connection` A gauge of the number of current connections being handled.
+
+Example usage can be found in the [examples folder](examples)
+
 ### TODO
 
-- Codecs are just filters with configurable things
-- Need to think about outputs for special events
-- Move source out of data and onto the event?
-- Should outputs have a list of exclude fields?
-- Allow outputs to take configurable date string? ISO time might not be that great for us
+- Need to think about outputs for special events (send interesting thing to slack, email, etc)
 - Add some helpers for things like renaming fields in filters?
-- Have outputs allow renaming fields?
-- Maybe outputs have format functions that can be defined that would format the data?
-- ElasticSearch output needs some love, dropped a few messages
-
-### Blah
-
-Inputs accept events and fill out the most basic of things: message, timestamp, source
-Message may need to be decoded so the user adds filters for specific sources or based on event data
