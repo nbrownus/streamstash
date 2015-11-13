@@ -17,6 +17,8 @@ Inputs packaged with StreamStash:
     Logging Protocol. For more info see the [relp webpage](http://www.rsyslog.com/doc/relp.html)
 - StdIn: Takes data received from standard input and creates events for them
 
+Example usage can be found in the [examples folder](examples)
+
 ### Filters
 
 Filters are javascript functions that allow you to modify event data or control the flow of an event through the system.
@@ -27,9 +29,9 @@ data manipulation, this is mainly because you were working in almost ruby but no
 
 Every event will contain the following properties in the data object:
 
-- source: The input plugin that generated the event.
-- message: The event message.
-- timestamp: The time the event occurred or was received by the input plugin.
+- `source`: The input plugin that generated the event.
+- `message`: The event message.
+- `timestamp`: The time the event occurred or was received by the input plugin.
 
 A simple filter example:
 
@@ -71,13 +73,13 @@ slower each event is processed.
 
 ### Outputs
 
-TODO: Docs!
-
 Outputs packaged with StreamStash:
 
-- ElasticSearch: Outputs event data to your [ElasticSearch](http://www.elasticsearch.org/overview) cluster.
+- `ElasticSearch`: Outputs event data to your [ElasticSearch](http://www.elasticsearch.org/overview) cluster.
     Works great with [kibana](http://www.elasticsearch.org/overview/kibana/)
-- StdOut: Writes event data to standard output
+- `StdOut`: Writes event data to standard output
+
+Example usage can be found in the [examples folder](examples)
 
 ### TODO
 
