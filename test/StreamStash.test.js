@@ -42,36 +42,55 @@ describe('StreamStash', function () {
 
             streamStash.stats.should.eql(
                 {
-                    startTime: null
-                  , events: {
-                        processing: 0
-                      , total: 0
+                    startTime: null,
+                    events: {
+                        processing: 0,
+                        total: 0,
+                        canceled: 0
+                    },
+                    plugins: {
+                        started: 0,
+                        stoppedInput: 0,
+                        stopped: 0,
+                        total: 0
                     }
-                  , plugins: {
-                        started: 0
-                      , stoppedInput: 0
-                      , stopped: 0
-                      , total: 0
-                    }
-                }
-              , 'stats was wrong'
+                },
+                'stats was wrong'
             )
         })
 
-        it('Should emit telemetry every 5 seconds', function (done) {
+        it('Should emit telemetry', function (done) {
             var streamStash = new StreamStash({ logger: new Logger(), telemetryInterval: 10 }),
-                seen = 0
+                seen = 0,
+                stats = ['events.processing', 'events.total', 'events.canceled']
+
+            try {
+                var v8 = require('v8')
+                stats.push(
+                    'process.memory.heap_size_limit',
+                    'process.memory.total_available_size',
+                    'process.memory.total_heap_size',
+                    'process.memory.total_heap_size_executable',
+                    'process.memory.total_physical_size',
+                    'process.memory.used_heap_size'
+
+                )
+            } catch (e) {
+                stats.push
+            }
 
             streamStash.telemetry.gauge = function (metric) {
-                if (metric != 'events.processing' && metric != 'events.total') {
-                    throw new Error('Got a metric we did not expect')
+                clearInterval(streamStash._telemetryInterval)
+                if (stats.indexOf(metric) < 0) {
+                    delete stats.indexOf(metric)
+                    throw new Error('Got a metric we did not expect: ' + metric)
                 }
 
                 seen++
 
-                //This is brittle and will miss added stats
-                if (seen == 2) {
-                    done()
+                //This is brittle and may miss added stats
+                if (seen == stats.length) {
+                    setTimeout(done, 20)
                 }
             }
 
