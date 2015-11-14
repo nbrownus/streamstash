@@ -76,14 +76,17 @@ describe('StreamStash', function () {
 
                 )
             } catch (e) {
-                stats.push
+                stats.push(
+                    'process.memory.heap_total',
+                    'process.memory.heap_used'
+                )
             }
 
             streamStash.telemetry.gauge = function (metric) {
                 clearInterval(streamStash._telemetryInterval)
                 if (stats.indexOf(metric) < 0) {
                     delete stats.indexOf(metric)
-                    throw new Error('Got a metric we did not expect: ' + metric)
+                    throw new Error('Got a metric we did not expect (possibly again): ' + metric)
                 }
 
                 seen++
