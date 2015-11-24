@@ -69,6 +69,17 @@ A little more advanced:
 Remember, this is all pure Node.js. You can do any crazy exotic thing you want. Just remember that the more you do the
 slower each event is processed.
 
+### Docker
+
+Make sure to replace relp_basic.js with your own config.js in the Dockerfile CMD section
+
+Building and running:
+
+```
+docker build -t streamstash .
+docker run -p 9200:9200 -p 9300:9300 -p 5514:5514 streamstash
+```
+
 ### Outputs
 
 TODO: Docs!
