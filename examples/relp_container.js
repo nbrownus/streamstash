@@ -1,14 +1,14 @@
 /**
- * Takes input from rsyslog via the omrelp output plugin and outputs event objects to stdout
+ * Takes input from rsyslog via the omrelp output plugin and outputs event objects to stdout while in a container
  *
  * Try it by running
  *
- *      ./bin/streamstash examples/relp_basic.js
+ *      ./bin/streamstash examples/relp_container.js
  *
  * Configure your rsyslog instance to talk us and restart
  *
  *      module(load="omrelp")
- *      action(type="omrelp" name="streamstash_relp" target="localhost" port="5514")
+ *      action(type="omrelp" name="streamstash_relp" target="IP_FOR_CONTAINER_HOST" port="5514")
  *
  * Make sure you have rsyslog-relp installed (ubuntu/debian)
  *
