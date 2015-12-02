@@ -10,4 +10,4 @@ EXPOSE 9300
 EXPOSE 5514
 
 # Make sure to replace relp_basic.js with your own config.js here
-CMD ["/src/bin/streamstash","/src/examples/relp_basic.js"]
+CMD ["/src/bin/streamstash","/src/examples/relp_container.js"]
