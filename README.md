@@ -72,6 +72,7 @@ slower each event is processed.
 ### Docker
 
 Make sure to replace `relp_basic.js` with your own `config.js` in the `Dockerfile` CMD section
+Also move Dockerfile from the examples folder into home directory or fix file structure in your commands.
 
 Building and running:
 
