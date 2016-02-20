@@ -1,6 +1,6 @@
 {
     "name": "streamstash",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "A log aggregating/filtering/redirecting service",
     "keywords": [
         "log",
