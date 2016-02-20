@@ -260,14 +260,21 @@ describe('StreamStash', function () {
 
         it('Should record filters on successful add', function () {
             var streamStash = new StreamStash({ logger: new Logger() })
-              , filter = function () {}
 
-            streamStash.addFilter(filter)
-            streamStash.filters[0].should.equal(filter)
+            var filter1 = function () {}
+            streamStash.addFilter(filter1)
+            streamStash.filters[0].func.should.equal(filter1)
+            streamStash.filters[0].name.should.eql(0)
 
-            filter = function () {}
-            streamStash.addFilter(filter)
-            streamStash.filters[1].should.equal(filter)
+            var filter2 = function () {}
+            streamStash.addFilter(filter2)
+            streamStash.filters[1].func.should.equal(filter2)
+            streamStash.filters[1].name.should.eql(1)
+
+            var filter3 = function () {}
+            streamStash.addFilter('test', filter3)
+            streamStash.filters[2].func.should.equal(filter3)
+            streamStash.filters[2].name.should.eql('test')
         })
 
     })

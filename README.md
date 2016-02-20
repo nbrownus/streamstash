@@ -52,9 +52,9 @@ A simple filter example:
         event.next()
     })
 
-A little more advanced:
+A little more advanced, this one is named:
 
-    addFilter(function (event) {
+    addFilter('cool', function (event) {
         // Drop all events with a 'stupid event' message, these events will never see an output plugin
         if (event.data.message == 'stupid event') {
             // Be sure to return anytime you may continue processing the event to avoid weird issues
@@ -76,6 +76,8 @@ A little more advanced:
         // Since this is the last thing in the filter there is no need to return
         event.next()
     })
+
+Filters get an integer name by default. If you want better error and telemetry reporting, give them a name.
 
 Remember, this is all pure Node.js. You can do any crazy exotic thing you want. Just remember that the more you do the
 slower each event is processed.
@@ -101,7 +103,7 @@ General stats
 
 - `events.processing` A gauge of how many events are currently being processed 
 - `events.total` A gauge of how many events have been processed since the start of the current process
-- `filter.#` A timer of how long each event took in each filter. Typically a histogram is created from the
+- `filter.<name>` A timer of how long each event took in each filter. Typically a histogram is created from the
     data so you can see p99, p95, mean, max, etc of the time spent in each filter.
 
 Some plugins may also emit stats.
