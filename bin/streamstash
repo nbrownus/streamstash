@@ -82,10 +82,12 @@ global.logger = logger
  * Adds a filter to the filter chain
  * TODO: Document the filter function args
  *
+ * @param {String} [name] Name of the filter, will show in telemetry, among other places.
+ *      Avoid using `.` unless you want your telemetry to be all screwy
  * @param {Function} func A filter function to add
  */
-global.addFilter = function (func) {
-    streamStash.addFilter(func)
+global.addFilter = function (name, func) {
+    streamStash.addFilter(name, func)
 }
 
 /**
