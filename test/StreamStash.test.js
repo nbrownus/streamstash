@@ -46,7 +46,8 @@ describe('StreamStash', function () {
                     events: {
                         processing: 0,
                         total: 0,
-                        canceled: 0
+                        canceled: 0,
+                        failed: 0
                     },
                     plugins: {
                         started: 0,
