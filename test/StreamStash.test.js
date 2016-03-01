@@ -63,7 +63,7 @@ describe('StreamStash', function () {
         it('Should emit telemetry', function (done) {
             var streamStash = new StreamStash({ logger: new Logger(), telemetryInterval: 10 }),
                 seen = 0,
-                stats = ['events.processing', 'events.total', 'events.canceled']
+                stats = ['events.processing', 'events.total', 'events.canceled', 'events.failed']
 
             try {
                 var v8 = require('v8')
