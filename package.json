@@ -32,7 +32,7 @@
     "dependencies": {
         "dashdash": "1.10.1",
         "underscore": "1.8.3",
-        "relp": "0.4.0",
+        "relp": "0.5.0",
         "statsd-client": "0.2.1"
     },
     "devDependencies": {
