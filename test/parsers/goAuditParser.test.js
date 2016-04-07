@@ -60,7 +60,7 @@ describe('goAuditParser', function () {
                     key: '(null)'
                 },
                 sequence: 1226679,
-                timestamp: '1459449216.329'
+                timestamp: new Date('1459449216.329' * 1000)
             }
         )
     })
@@ -94,7 +94,7 @@ describe('goAuditParser', function () {
                     command: 'curl hhhhhhh'
                 },
                 sequence: 1226679,
-                timestamp: '1459449216.329'
+                timestamp: new Date('1459449216.329' * 1000)
             }
         )
     })
@@ -137,7 +137,7 @@ describe('goAuditParser', function () {
                     }
                 ],
                 sequence: 1226679,
-                timestamp: '1459449216.329'
+                timestamp: new Date('1459449216.329' * 1000)
             }
         )
     })
@@ -158,7 +158,7 @@ describe('goAuditParser', function () {
             {
                 cwd: '/home/ubuntu/test with spaces',
                 sequence: 1226679,
-                timestamp: '1459449216.329'
+                timestamp: new Date('1459449216.329' * 1000)
             }
         )
     })
@@ -246,7 +246,7 @@ describe('goAuditParser', function () {
                     command: 'curl hhhhhhh'
                 },
                 sequence: 1226679,
-                timestamp: '1459449216.329'
+                timestamp: new Date('1459449216.329' * 1000)
             }
         )
     })

@@ -10,10 +10,9 @@ describe('parser helper wrapper', function () {
 
         result.should.eql(true)
         event.data.should.eql({
-            message: '{"derp":"flerp","message":"hi"}',
+            message: 'hi',
             json: {
-                derp: 'flerp',
-                message: 'hi'
+                derp: 'flerp'
             }
         })
 
@@ -27,7 +26,7 @@ describe('parser helper wrapper', function () {
         event.data.should.eql({
             message: '"derp":"flerp","message":"hi"}',
             _type: 'unparseable',
-            parseError: 'SyntaxError: Unexpected token :'
+            parse_error: 'json: SyntaxError: Unexpected token :'
         })
     })
 
@@ -39,7 +38,7 @@ describe('parser helper wrapper', function () {
         event.data.should.eql({
             message: '"derp":"flerp","message":"hi"}',
             customType: 'unparseable',
-            parseError: 'SyntaxError: Unexpected token :'
+            parse_error: 'json: SyntaxError: Unexpected token :'
         })
     })
 
