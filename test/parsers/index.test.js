@@ -10,22 +10,13 @@ describe('parser helper wrapper', function () {
 
         result.should.eql(true)
         event.data.should.eql({
-            message: 'hi',
-            derp: 'flerp'
+            message: '{"derp":"flerp","message":"hi"}',
+            json: {
+                derp: 'flerp',
+                message: 'hi'
+            }
         })
 
-    })
-
-    it('Should copy the original message if asked', function () {
-        var event = new EventContainer({ message: '{"derp":"flerp","message":"hi"}' }),
-            result = StreamStash.parsers.jsonParser(event, void 0, true)
-
-        result.should.eql(true)
-        event.data.should.eql({
-            message: 'hi',
-            derp: 'flerp',
-            originalMessage: '{"derp":"flerp","message":"hi"}'
-        })
     })
 
     it('Should set parseError and _type on error', function () {
