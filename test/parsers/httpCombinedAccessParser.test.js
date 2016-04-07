@@ -12,6 +12,9 @@ describe('httpCombinedAccessParser', function () {
                 bytes: '140',
                 identd: 'derp',
                 message: 'GET /path HTTP/1.1',
+                method: 'GET',
+                path: '/path',
+                version: 'HTTP/1.1',
                 referrer: 'http://referrer',
                 remote_host: '127.0.0.1',
                 status_code: '200',
@@ -29,6 +32,9 @@ describe('httpCombinedAccessParser', function () {
             {
                 bytes: '140',
                 message: 'GET /path HTTP/1.1',
+                method: 'GET',
+                path: '/path',
+                version: 'HTTP/1.1',
                 status_code: '200',
                 timestamp: new Date('2016-02-08 21:43:01.000 -0800')
             }
@@ -42,6 +48,9 @@ describe('httpCombinedAccessParser', function () {
             {
                 bytes: '140',
                 message: 'GET /path HTTP/1.1',
+                method: 'GET',
+                path: '/path',
+                version: 'HTTP/1.1',
                 status_code: '200'
             },
             'Invalid date'
