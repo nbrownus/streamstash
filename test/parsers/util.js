@@ -1,15 +1,14 @@
-var EventContainer = require('../../lib/EventContainer')
-
 module.exports.assertParserResult = function (parserFunc, message, data, error) {
-    var event = new EventContainer({ message: message }),
-        result = parserFunc(event.data.message)
+    var result = parserFunc(message)
 
     if (data === void 0) {
         if (result.data !== void 0) {
             throw new Error('Expected result.data to be undefined')
         }
-    } else {
+    } else if (result.data !== void 0) {
         result.data.should.eql(data)
+    } else {
+        throw new Error('Did not get any result data back')
     }
 
     if (error === void 0) {

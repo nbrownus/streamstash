@@ -195,7 +195,7 @@ describe('StdInInput', function () {
 
         stdin.on('event', function (event) {
             event.state.should.equal(EventContainer.STATE.PROCESSING, 'Event state was wrong')
-            event.data.source.should.equal('StdIn', 'Event source was wrong')
+            event.data.event_source.should.eql({ name: 'StdIn' }, 'Event source was wrong')
             event.data.message.should.equal('hey', 'Event message was wrong')
             event.data.timestamp.should.instanceof(Date, 'Event timestamp was wrong')
             done()
@@ -222,7 +222,7 @@ describe('StdInInput', function () {
             })
 
         stdin.on('event', function (event) {
-            event.data.added.should.equal('yup', 'Added field was wrong')
+            event.data.event_source.should.eql({ added: 'yup', name: 'StdIn' }, 'Added field was wrong')
             done()
         })
 
@@ -237,18 +237,18 @@ describe('StdInInput', function () {
         stream.resume = function () {}
 
         var stdin = new StdInInput({
-                streamStash: streamStash
-              , logger: new Logger()
-              , EventContainer: EventContainer
-              , stream: stream
-              , fields: {
-                    added: 'yup'
-                  , message: 'overwrite'
-                }
-            })
+            streamStash: streamStash,
+            logger: new Logger(),
+            EventContainer: EventContainer,
+            stream: stream,
+            fields: {
+                added: 'yup',
+                name: 'overwrite'
+            }
+        })
 
         stdin.on('event', function (event) {
-            event.data.added.should.equal('yup', 'Added field was wrong')
+            event.data.event_source.should.eql({ name: 'overwrite', added: 'yup' })
             event.data.message.should.equal('hey', 'Event message was wrong')
             done()
         })

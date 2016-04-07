@@ -1,7 +1,7 @@
 var StreamStash = require('../../'),
     assertParserResult = require('./util').assertParserResult
 
-describe.only('httpVHostCombinedAccessParser', function () {
+describe('httpVHostCombinedAccessParser', function () {
 
     it('Should parse a regular vhost combined access log line', function () {
         assertParserResult(
