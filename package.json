@@ -30,9 +30,9 @@
         "test": "make test"
     },
     "dependencies": {
-        "dashdash": "1.10.1",
+        "dashdash": "1.13.0",
         "underscore": "1.8.3",
-        "relp": "0.5.0",
+        "relp": "0.5.1",
         "statsd-client": "0.2.1"
     },
     "devDependencies": {
