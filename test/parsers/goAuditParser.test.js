@@ -34,7 +34,8 @@ describe('goAuditParser', function () {
             {
                 syscall: {
                     arch: { bits: '64', endianness: 'little', name: 'x86_64' },
-                    syscall: '59',
+                    id: '59',
+                    name: 'execve',
                     success: 'yes',
                     exit: '0',
                     a0: '7f7242278f28',
@@ -55,12 +56,13 @@ describe('goAuditParser', function () {
                     fsgid: '1000',
                     tty: 'pts0',
                     session_id: '37',
-                    comm: 'curl',
-                    exe: '/usr/bin/curl',
-                    key: '(null)'
+                    command: 'curl',
+                    executable: '/usr/bin/curl',
+                    key: ''
                 },
                 sequence: 1226679,
-                timestamp: new Date('1459449216.329' * 1000)
+                timestamp: new Date('1459449216.329' * 1000),
+                message: "ubuntu succeeded to execve unknown path via /usr/bin/curl"
             }
         )
     })
@@ -90,11 +92,11 @@ describe('goAuditParser', function () {
                     argv: [
                         'curl',
                         'hhhhhhh'
-                    ],
-                    command: 'curl hhhhhhh'
+                    ]
                 },
                 sequence: 1226679,
-                timestamp: new Date('1459449216.329' * 1000)
+                timestamp: new Date('1459449216.329' * 1000),
+                message: ""
             }
         )
     })
@@ -137,7 +139,8 @@ describe('goAuditParser', function () {
                     }
                 ],
                 sequence: 1226679,
-                timestamp: new Date('1459449216.329' * 1000)
+                timestamp: new Date('1459449216.329' * 1000),
+                message: ""
             }
         )
     })
@@ -158,7 +161,8 @@ describe('goAuditParser', function () {
             {
                 cwd: '/home/ubuntu/test with spaces',
                 sequence: 1226679,
-                timestamp: new Date('1459449216.329' * 1000)
+                timestamp: new Date('1459449216.329' * 1000),
+                message: ""
             }
         )
     })
@@ -188,67 +192,49 @@ describe('goAuditParser', function () {
             StreamStash.parsers.goAuditParser.raw,
             JSON.stringify(data),
             {
-                cwd: '/home/ubuntu/test with spaces',
-                paths: [
-                    {
-                        dev: 'ca:01',
-                        inode: '638',
-                        mode: '0100755',
-                        name: '/usr/bin/curl',
-                        nametype: 'NORMAL',
-                        ogid: '0',
-                        ouid: { id: '0', name: 'root' },
-                        rdev: '00:00'
-                    },
-                    {
-                        dev: 'ca:01',
-                        inode: '396037',
-                        mode: '0100755',
-                        name: '/lib64/ld-linux-x86-64.so.2',
-                        nametype: 'NORMAL',
-                        ogid: '0',
-                        ouid: { id: '0', name: 'root' },
-                        rdev: '00:00'
-                    }
+                "timestamp":new Date('1459449216.329' * 1000),
+                "sequence":1226679,
+                "syscall":{
+                    "arch":{"bits":"64","endianness":"little","name":"x86_64"},
+                    "success":"yes",
+                    "exit":"0",
+                    "a0":"7f7242278f28",
+                    "a1":"7f7242278e60",
+                    "a2":"7f7242278e78",
+                    "a3":"7f7241707a10",
+                    "items":"2",
+                    "ppid":"15125",
+                    "pid":"15126",
+                    "auid":{"name":"ubuntu","id":"1000"},
+                    "uid":{"name":"ubuntu","id":"1000"},
+                    "gid":"1000",
+                    "euid":{"name":"ubuntu","id":"1000"},
+                    "suid":{"name":"ubuntu","id":"1000"},
+                    "fsuid":{"name":"ubuntu","id":"1000"},
+                    "egid":"1000",
+                    "sgid":"1000",
+                    "fsgid":"1000",
+                    "tty":"pts0",
+                    "key":"",
+                    "id":"59",
+                    "session_id":"37",
+                    "name":"execve",
+                    "command":"curl",
+                    "executable":"/usr/bin/curl"
+                },
+                "paths":[
+                    {"name":"/usr/bin/curl","inode":"638","dev":"ca:01","mode":"0100755","ouid":{"name":"root","id":"0"},"ogid":"0","rdev":"00:00","nametype":"NORMAL"},
+                    {"name":"/lib64/ld-linux-x86-64.so.2","inode":"396037","dev":"ca:01","mode":"0100755","ouid":{"name":"root","id":"0"},"ogid":"0","rdev":"00:00","nametype":"NORMAL"}
                 ],
-                syscall: {
-                    arch: { bits: '64', endianness: 'little', name: 'x86_64' },
-                    syscall: '59',
-                    success: 'yes',
-                    exit: '0',
-                    a0: '7f7242278f28',
-                    a1: '7f7242278e60',
-                    a2: '7f7242278e78',
-                    a3: '7f7241707a10',
-                    items: '2',
-                    ppid: '15125',
-                    pid: '15126',
-                    auid: { name: 'ubuntu', id: '1000' },
-                    uid: { name: 'ubuntu', id: '1000' },
-                    gid: '1000',
-                    euid: { name: 'ubuntu', id: '1000' },
-                    suid: { name: 'ubuntu', id: '1000' },
-                    fsuid: { name: 'ubuntu', id: '1000' },
-                    egid: '1000',
-                    sgid: '1000',
-                    fsgid: '1000',
-                    tty: 'pts0',
-                    session_id: '37',
-                    comm: 'curl',
-                    exe: '/usr/bin/curl',
-                    key: '(null)'
+                "cwd":"/home/ubuntu/test with spaces",
+                "execve":{
+                    "argv":["curl","hhhhhhh"]
                 },
-                execve: {
-                    argv: [
-                        'curl',
-                        'hhhhhhh'
-                    ],
-                    command: 'curl hhhhhhh'
-                },
-                sequence: 1226679,
-                timestamp: new Date('1459449216.329' * 1000)
+                "message":"ubuntu succeeded to execve /usr/bin/curl"
             }
         )
     })
+
+    
 
 })
