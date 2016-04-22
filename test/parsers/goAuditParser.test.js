@@ -62,7 +62,7 @@ describe('goAuditParser', function () {
                 },
                 sequence: 1226679,
                 timestamp: new Date('1459449216.329' * 1000),
-                message: "ubuntu succeeded to execve unknown path via /usr/bin/curl"
+                message: "ubuntu succeeded to execve `unknown path` via `/usr/bin/curl`"
             }
         )
     })
@@ -227,10 +227,9 @@ describe('goAuditParser', function () {
                 "execve":{
                     "command":"curl hhhhhhh"
                 },
-                "message":"ubuntu succeeded to execve curl hhhhhhh via /usr/bin/curl"
+                "message":"ubuntu succeeded to execve `curl hhhhhhh` via `/usr/bin/curl`"
             }
         )
     })
-
 
 })
