@@ -89,10 +89,7 @@ describe('goAuditParser', function () {
             JSON.stringify(data),
             {
                 execve: {
-                    argv: [
-                        'curl',
-                        'hhhhhhh'
-                    ]
+                    command: 'curl hhhhhhh'
                 },
                 sequence: 1226679,
                 timestamp: new Date('1459449216.329' * 1000),
@@ -228,13 +225,12 @@ describe('goAuditParser', function () {
                 ],
                 "cwd":"/home/ubuntu/test with spaces",
                 "execve":{
-                    "argv":["curl","hhhhhhh"]
+                    "command":"curl hhhhhhh"
                 },
-                "message":"ubuntu succeeded to execve /usr/bin/curl"
+                "message":"ubuntu succeeded to execve curl hhhhhhh via /usr/bin/curl"
             }
         )
     })
 
-    
 
 })
