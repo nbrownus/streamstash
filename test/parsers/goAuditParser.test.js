@@ -232,4 +232,16 @@ describe('goAuditParser', function () {
         )
     })
 
+    it('Should handle = in values properly', function () {
+        var data = {"sequence":10453717,"timestamp":"1462897538.564","messages":[{"type":1309,"data":"argc=1 a0=\"stuff=things\""}]},
+            result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
+
+        result.data.execve.command.should.eql("stuff=things")
+
+        data = {"sequence":10453717,"timestamp":"1462897538.564","messages":[{"type":1309,"data":"argc=1 a0=\"stuff=\""}]}
+        result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
+
+        result.data.execve.command.should.eql("stuff=")
+    })
+
 })
