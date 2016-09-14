@@ -61,6 +61,7 @@ describe('goAuditParser', function () {
                     key: ''
                 },
                 sequence: 1226679,
+                unknown: [],
                 timestamp: new Date('1459449216.329' * 1000),
                 message: "ubuntu succeeded to execve `unknown path` via `/usr/bin/curl`"
             }
@@ -92,6 +93,7 @@ describe('goAuditParser', function () {
                     command: 'curl hhhhhhh'
                 },
                 sequence: 1226679,
+                unknown: [],
                 timestamp: new Date('1459449216.329' * 1000),
                 message: ""
             }
@@ -136,6 +138,7 @@ describe('goAuditParser', function () {
                     }
                 ],
                 sequence: 1226679,
+                unknown: [],
                 timestamp: new Date('1459449216.329' * 1000),
                 message: ""
             }
@@ -158,6 +161,7 @@ describe('goAuditParser', function () {
             {
                 cwd: '/home/ubuntu/test with spaces',
                 sequence: 1226679,
+                unknown: [],
                 timestamp: new Date('1459449216.329' * 1000),
                 message: ""
             }
@@ -191,6 +195,7 @@ describe('goAuditParser', function () {
             {
                 "timestamp":new Date('1459449216.329' * 1000),
                 "sequence":1226679,
+                "unknown": [],
                 "syscall":{
                     "arch":{"bits":"64","endianness":"little","name":"x86_64"},
                     "success":"yes",
@@ -242,6 +247,27 @@ describe('goAuditParser', function () {
         result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
 
         result.data.execve.command.should.eql("stuff=")
+    })
+
+    it('Should parse a sockaddr', function () {
+        var data = {"sequence":10453717,"timestamp":"1462897538.564","messages":[{"type":1306,"data":"saddr=0200270F000000000000000000000000"}]},
+            result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
+        result.data.socket_address.should.eql({"family":"inet","port":9999,"ip":"0.0.0.0","unknown":"0000000000000000"})
+
+        data = {"sequence":10453717,"timestamp":"1462897538.564","messages":[{"type":1306,"data":"saddr=0A00270F0000000000000000000000000000000000000001000000000000"}]}
+        result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
+        result.data.socket_address.should.eql({"family":"inet6","port":9999,"flow_info":"00000000","ip":"0000:0000:0000:0000:0000:0000:0000:0001","scope_id":"00000000","unknown":"0000"})
+
+        data = {"sequence":10453717,"timestamp":"1462897538.564","messages":[{"type":1306,"data":"saddr=01002F686F6D652F6E6174652F736F636B65740010"}]}
+        result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
+        result.data.socket_address.should.eql({"family":"local","path":"/home/nate/socket","unknown":"0010"})
+    })
+
+    it('should parse a proctitle', function () {
+        var data = {"sequence":1188,"timestamp":"1473790050.668","messages":[{"type":1327,"data":"proctitle=6E63002D6C0039393939"}]},
+            result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
+
+        result.data.proctitle.should.eql('nc -l 9999')
     })
 
 })
