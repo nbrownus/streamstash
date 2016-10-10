@@ -1,7 +1,7 @@
 var StreamStash = require('../../'),
     assertParserResult = require('./util').assertParserResult
 
-describe.only('sshdParser', function () {
+describe('sudoParser', function () {
 
     it('Should parse simple command', function () {
         assertParserResult(
@@ -14,6 +14,22 @@ describe.only('sshdParser', function () {
                 pwd: '/home/nate/hi there/oops;',
                 tty: 'pts/0',
                 user: 'nate'
+            }
+        )
+    })
+
+    it('Should parse a sudo error', function () {
+        assertParserResult(
+            StreamStash.parsers.sudoParser.raw,
+            '    someone : command not allowed ; TTY=pts/40 ; PWD=/home/somewhere ; USER=root ; COMMAND=/bin/something',
+            {
+                as_user: 'root',
+                command: '/bin/something',
+                error: 'command not allowed',
+                event: 'error',
+                pwd: '/home/somewhere',
+                tty: 'pts/40',
+                user: 'someone'
             }
         )
     })
