@@ -1,5 +1,6 @@
 var StreamStash = require('../../'),
     assertParserResult = require('./util').assertParserResult,
+    assertParserResultContains = require('./util').assertParserResultContains,
     EventContainer = StreamStash.EventContainer
 
 describe('jsonParser', function () {
@@ -13,7 +14,7 @@ describe('jsonParser', function () {
     })
 
     it('Should have the proper error', function () {
-        assertParserResult(
+        assertParserResultContains(
             StreamStash.parsers.jsonParser.raw,
             'derp',
             void 0,
