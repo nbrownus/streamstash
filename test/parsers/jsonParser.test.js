@@ -17,7 +17,7 @@ describe('jsonParser', function () {
             StreamStash.parsers.jsonParser.raw,
             'derp',
             void 0,
-            'SyntaxError: Unexpected token d'
+            'SyntaxError: Unexpected token d in JSON at position 0'
         )
     })
 

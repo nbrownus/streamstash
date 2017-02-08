@@ -26,7 +26,7 @@ describe('parser helper wrapper', function () {
         event.data.should.eql({
             message: '"derp":"flerp","message":"hi"}',
             _type: 'unparseable',
-            parse_error: 'json: SyntaxError: Unexpected token :'
+            parse_error: 'json: SyntaxError: Unexpected token : in JSON at position 6'
         })
     })
 
@@ -38,7 +38,7 @@ describe('parser helper wrapper', function () {
         event.data.should.eql({
             message: '"derp":"flerp","message":"hi"}',
             customType: 'unparseable',
-            parse_error: 'json: SyntaxError: Unexpected token :'
+            parse_error: 'json: SyntaxError: Unexpected token : in JSON at position 6'
         })
     })
 
