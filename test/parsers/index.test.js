@@ -23,11 +23,8 @@ describe('parser helper wrapper', function () {
             result = StreamStash.parsers.jsonParser(event)
 
         result.should.eql(false)
-        event.data.should.eql({
-            message: '"derp":"flerp","message":"hi"}',
-            _type: 'unparseable',
-            parse_error: 'json: SyntaxError: Unexpected token :'
-        })
+        event.data.parse_error.should.containEql(
+            'json: SyntaxError: Unexpected token :')
     })
 
     it('Should set parseError and the specified type property on error', function () {
@@ -35,11 +32,8 @@ describe('parser helper wrapper', function () {
             result = StreamStash.parsers.jsonParser(event, 'customType')
 
         result.should.eql(false)
-        event.data.should.eql({
-            message: '"derp":"flerp","message":"hi"}',
-            customType: 'unparseable',
-            parse_error: 'json: SyntaxError: Unexpected token :'
-        })
+        event.data.parse_error.should.containEql(
+            'json: SyntaxError: Unexpected token :')
     })
 
     it('Should not modify event.data if no data was parsed', function () {
