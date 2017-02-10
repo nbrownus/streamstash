@@ -29,4 +29,20 @@ describe('merakiParser', function () {
 			}
 		)
 	})
+	it('Should parse Meraki IDS logs', function() {
+		assertParserResult(
+			StreamStash.parsers.merakiParser.raw,
+			'SFO_5TH_FW1 ids-alerts signature=128:1:1 priority=1 timestamp=1486600623.475848 shost=00:18:0A:78:BE:67 direction=ingress protocol=tcp/ip src=10.10.90.47:62753 dst=54.152.167.64:22 message: (spp_ssh) Challenge-Response Overflow exploit',
+			{
+				event: 'meraki_ids_alerts',
+				sid: '128:1',
+				direction: 'ingress',
+				src_ip: '10.10.90.47',
+				src_port: '62753',
+				dst_ip: '54.152.167.64',
+				dst_port: '22',
+				description: '(spp_ssh) Challenge-Response Overflow exploit',
+			}
+		)
+	})
 })
