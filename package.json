@@ -1,44 +1,45 @@
 {
-    "name": "streamstash",
-    "version": "1.3.0",
-    "description": "A log aggregating/filtering/redirecting service",
-    "keywords": [
-        "log",
-        "flume",
-        "logstash",
-        "fluentd",
-        "logs",
-        "elasticsearch",
-        "relp",
-        "syslog",
-        "rsyslog"
-    ],
-    "author": {
-        "name": "Nathan Brown",
-        "email": "nbrown.us@gmail.com"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/nbrownus/streamstash"
-    },
-    "main": "./index",
-    "license": "MIT",
-    "engines": {
-        "node": ">= 0.10.x"
-    },
-    "scripts": {
-        "test": "make test"
-    },
-    "dependencies": {
-        "dashdash": "1.13.0",
-        "underscore": "1.8.3",
-        "relp": "git://github.com/nbrownus/node-relp",
-        "statsd-client": "0.2.1"
-    },
-    "devDependencies": {
-        "istanbul": "0.4.x",
-        "ppunit": "x",
-        "should": "7.1.x",
-        "jsdoc": "3.3.3"
-    }
+  "name": "streamstash",
+  "version": "1.3.0",
+  "description": "A log aggregating/filtering/redirecting service",
+  "keywords": [
+    "log",
+    "flume",
+    "logstash",
+    "fluentd",
+    "logs",
+    "elasticsearch",
+    "relp",
+    "syslog",
+    "rsyslog"
+  ],
+  "author": {
+    "name": "Nathan Brown",
+    "email": "nbrown.us@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nbrownus/streamstash"
+  },
+  "main": "./index",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10.x"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "dependencies": {
+    "dashdash": "1.13.0",
+    "elasticsearch": "^12.1.3",
+    "relp": "git://github.com/nbrownus/node-relp",
+    "statsd-client": "0.2.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "istanbul": "0.4.x",
+    "ppunit": "x",
+    "should": "7.1.x",
+    "jsdoc": "3.3.3"
+  }
 }
