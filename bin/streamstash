@@ -194,10 +194,6 @@ streamStash.once('stopped', function () {
 // Start it up
 streamStash.start()
 
-var lastTotal = 0,
-    perSec = 0,
-    maxPerSec = 0
-
 process.on('uncaughtException', function (error) {
     logger.error(error.stack || error)
     streamStash.shutdown('Uncaught exception occurred')
