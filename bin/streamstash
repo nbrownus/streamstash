@@ -177,17 +177,17 @@ files.forEach(function (filePath) {
 streamStash.killTimeout = opts['kill_timeout']
 
 process.on('SIGINT', function () {
-    logger.info('Got SIGINT, starting shutdown')
+    logger.info('StreamStash', 'Got SIGINT, starting shutdown')
     streamStash.shutdown('SIGINT after shutdown request')
 })
 
 process.on('SIGTERM', function () {
-    logger.info('Got SIGTERM, starting shutdown')
+    logger.info('StreamStash', 'Got SIGTERM, starting shutdown')
     streamStash.shutdown('SIGTERM after shutdown request')
 })
 
 streamStash.once('stopped', function () {
-    logger.info('Exited gracefully')
+    logger.info('StreamStash', 'Exited gracefully')
     process.exit(0)
 })
 
@@ -195,7 +195,7 @@ streamStash.once('stopped', function () {
 streamStash.start()
 
 process.on('uncaughtException', function (error) {
-    logger.error(error.stack || error)
+    logger.error('uncaught_exception', error, { error: error.stack || error })
     streamStash.shutdown('Uncaught exception occurred')
 })
 
