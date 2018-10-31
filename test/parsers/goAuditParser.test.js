@@ -249,6 +249,25 @@ describe('goAuditParser', function () {
         result.data.execve.command.should.eql("stuff=")
     })
 
+    it('Should get dnstap info', function () {
+     var data = {                                  
+               "sequence": 4734103,             
+               "timestamp": "1541004016.778",   
+               "messages": [                    
+                           {"type": 1306, "data": "saddr=02000050ACD91D8E0000000000000000"},                             
+                         ],                               
+               "dnstap": {                      
+                           "172.217.29.142": "google.com" 
+                         }                                
+     }    
+   
+        assertParserResult(
+            StreamStash.parsers.goAuditParser.raw,
+            JSON.stringify(data),
+            {"timestamp":new Date('1541004016.778' * 1000),"sequence":4734103,"unknown":[],"socket_address":{"family":"inet","port":80,"ip":"172.217.29.142","unknown":"0000000000000000"},"dnstap":"google.com","message":""}
+        )
+    })
+
     it('Should parse a sockaddr', function () {
         var data = {"sequence":10453717,"timestamp":"1462897538.564","messages":[{"type":1306,"data":"saddr=0200270F000000000000000000000000"}]},
             result = StreamStash.parsers.goAuditParser.raw(JSON.stringify(data))
