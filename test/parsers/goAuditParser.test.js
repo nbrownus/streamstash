@@ -257,7 +257,7 @@ describe('goAuditParser', function () {
                            {"type": 1306, "data": "saddr=02000050ACD91D8E0000000000000000"},                             
                          ],                               
                "dnstap": {                      
-                           "172.217.29.142": "google.com" 
+                           "172.217.29.142": "google.com"
                          }                                
      }    
    
@@ -266,7 +266,7 @@ describe('goAuditParser', function () {
             JSON.stringify(data),
             {"timestamp":new Date('1541004016.778' * 1000),"sequence":4734103,"unknown":[],"socket_address":{"family":"inet","port":80,"ip":"172.217.29.142","unknown":"0000000000000000"},"message":"",
                "dnstap": {                      
-                           "172.217.29.142": "google.com" 
+                           "172.217.29.142": ["google.com"]
                          }                                
     	    }
         )
