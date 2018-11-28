@@ -6,7 +6,6 @@
 alternative to projects like [logstash](http://logstash.net/), [flume](http://flume.apache.org/),
 [fluentd](http://fluentd.org/), etc.
 
-I am currently working on a [v2.0](../../tree/2.0) which adds support for the soon to be released `go-audit` tool, among many other changes. For the most part the head of that branch is being used in production but things may break at any time before a proper release.
 
 ### Usage
 
