@@ -26,6 +26,10 @@ Inputs packaged with `streamstash`:
 - RELP: Provides an easy and reliable integration with rsyslog. Uses [rsyslogs](http://www.rsyslog.com/) Reliable Event
     Logging Protocol. For more info see the [relp webpage](http://www.rsyslog.com/doc/relp.html)
 - StdIn: Takes data received from standard input and creates events for them
+- Socket: A very customizable connection oriented socket input
+- StaticFile: Simple static file ingestion, main use case is to run streamstash per file you need to ingest
+- SMTP: Turns email received via SMTP into events
+- HTTP: Turns http requests into events.
 
 Example usage can be found in the [examples folder](examples)
 
