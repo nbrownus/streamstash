@@ -50,70 +50,25 @@ describe('Logger', function () {
         logger.debug('debug')
     })
 
-    it('Should prefix all messages with `[date] LEVEL `', function () {
+    it('Should add timestamp and level to all messages', function () {
         var level = Logger.NAMES[Logger.LEVEL.ERROR]
           , stream = {
                 write: function (message) {
-                    var regex = new RegExp(
-                        '\\[\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+Z\\] ' + level + ' test'
-                    )
-                    message.should.match(regex)
+                    var m = JSON.parse(message)
+                    m.should.have.keys('timestamp', 'message', 'name', 'level', 'data')
+                    m.data.should.have.keys('extra')
                 }
             }
           , logger = new Logger({ level: Logger.LEVEL.DEBUG, stream: stream })
 
         level = Logger.NAMES[Logger.LEVEL.ERROR]
-        logger.error('test')
+        logger.error('test', 'msg', {extra: 'stuff'})
 
         level = Logger.NAMES[Logger.LEVEL.INFO]
-        logger.info('test')
+        logger.info('test', 'msg', {extra: 'stuff'})
 
         level = Logger.NAMES[Logger.LEVEL.DEBUG]
-        logger.debug('test')
-    })
-
-    it('Should format the message properly if multiple arguments were passed', function () {
-        var level = Logger.NAMES[Logger.LEVEL.ERROR]
-          , stream = {
-                write: function (message) {
-                    var regex = new RegExp(
-                        '\\[\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+Z\\] ' + level + ' 1st 2nd'
-                    )
-                    message.should.match(regex)
-                }
-            }
-          , logger = new Logger({ level: Logger.LEVEL.DEBUG, stream: stream })
-
-        level = Logger.NAMES[Logger.LEVEL.ERROR]
-        logger.error('1st', '2nd')
-
-        level = Logger.NAMES[Logger.LEVEL.INFO]
-        logger.info('1st', '2nd')
-
-        level = Logger.NAMES[Logger.LEVEL.DEBUG]
-        logger.debug('1st', '2nd')
-    })
-
-    it('Should format the message properly if multiple arguments were passed and the first is in printf style', function () {
-        var level = Logger.NAMES[Logger.LEVEL.ERROR]
-          , stream = {
-                write: function (message) {
-                    var regex = new RegExp(
-                        '\\[\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+Z\\] ' + level + ' hey 2nd'
-                    )
-                    message.should.match(regex)
-                }
-            }
-          , logger = new Logger({ level: Logger.LEVEL.DEBUG, stream: stream })
-
-        level = Logger.NAMES[Logger.LEVEL.ERROR]
-        logger.error('hey %s', '2nd')
-
-        level = Logger.NAMES[Logger.LEVEL.INFO]
-        logger.info('hey %s', '2nd')
-
-        level = Logger.NAMES[Logger.LEVEL.DEBUG]
-        logger.debug('hey %s', '2nd')
+        logger.debug('test', 'msg', {extra: 'stuff'})
     })
 
 })

@@ -30,15 +30,18 @@
         "test": "make test"
     },
     "dependencies": {
-        "dashdash": "1.10.1",
+        "dashdash": "1.13.0",
+        "relp": "git://github.com/nbrownus/node-relp",
+        "smtp-server": "^3.4.7",
+        "statsd-client": "0.2.1",
         "underscore": "1.8.3",
-        "relp": "0.5.0",
-        "statsd-client": "0.2.1"
+        "uuid": "3.0.1"
     },
     "devDependencies": {
         "istanbul": "0.4.x",
+        "jsdoc": "3.3.3",
+        "nodemailer": "^4.6.8",
         "ppunit": "x",
-        "should": "7.1.x",
-        "jsdoc": "3.3.3"
+        "should": "7.1.x"
     }
 }

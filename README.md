@@ -84,18 +84,6 @@ Filters get an integer name by default. If you want better error and telemetry r
 Remember, this is all pure Node.js. You can do any crazy exotic thing you want. Just remember that the more you do the
 slower each event is processed.
 
-### Docker
-
-Make sure to replace `relp_basic.js` with your own `config.js` in the `Dockerfile` CMD section.
-Also, move Dockerfile from the examples folder into home directory or fix file structure in your commands.
-
-Building and running:
-
-```
-docker build -t streamstash .
-docker run -p 9200:9200 -p 9300:9300 -p 5514:5514 streamstash
-```
-
 ### Outputs
 
 Outputs are exactly what they sound like. The output an event to a place.
@@ -124,9 +112,21 @@ Some plugins may also emit stats.
 
 `RELP`
 
-- `<PLUGIN NAME>.connection` A gauge of the number of current connections being handled.
+- `inputs.<PLUGIN NAME>.connection` A gauge of the number of current connections being handled.
 
 Example usage can be found in the [examples folder](examples)
+
+### Docker
+
+Make sure to replace `relp_basic.js` with your own `config.js` in the `Dockerfile` CMD section.
+Also, move Dockerfile from the examples folder into home directory or fix file structure in your commands.
+
+Building and running:
+
+```
+docker build -t streamstash .
+docker run -p 9200:9200 -p 9300:9300 -p 5514:5514 streamstash
+```
 
 ### TODO
 

@@ -1,75 +1,53 @@
 /**
  * Takes input from rsyslog via the omrelp output plugin and outputs event objects to elasticsearch
- *
- * This example parses customized nginx combined access logs and json parses any log message starting
- * with `@json:`
  */
 
 var util = require('util')
-  , nginxRegex = new RegExp('^(nginx(?!-error)|lb..[ab])')
-  , CombinedAccess = require('../').codecs.CombinedAccess
-  , nginxCodec = new CombinedAccess({
-        regex: new RegExp('^(\\S+) (\\S+) - (\\S+) \\[([^\\]]+)\\] "([A-Z]+[^"]*)" (\\d+) (\\d+) "([^"]*)" "([^"]*)"$')
-      , fields: ['request_id', 'nginx.remote_host', 'nginx.user', 'timestamp', 'message', 'nginx.status_code', 'nginx.bytes', 'nginx.referrer', 'nginx.user_agent']
-      , timestampField: 'timestamp'
-    })
 
-//addInputPlugin('stdin')
-addInputPlugin('relp', { host: 'localhost', port: 5514 })
-//addOutputPlugin('stdout')
+addInputPlugin(
+    'relp',
+    {
+        host: 'localhost',
+        port: 5514,
+        // Rename the input, this will show in logs and in telemetry
+        name: 'my-relp-input'
+    }
+)
 
 addOutputPlugin(
-    'elasticsearch'
-  , {
-        typeField: '@type'
-      , rename: {
-            //Rename the fields on output
-            'message': '@message'
-          , 'timestamp': '@timestamp'
-            //TODO: probably should specify field values for the codec
-          , 'facilityName': '@facility'
-          , 'severityName': '@severity'
-          , 'host': '@host'
-          , 'service': '@tag'
-            //Don't output these fields
-            //TODO: Probably should be able to tell the codec to not give us these fields
-          , 'severity': void 0
-          , 'facility': void 0
-          , 'priority': void 0
-            //This is so type isn't output twice
-          , '@type': void 0
-        }
+    'elasticsearch',
+    {
+        typeField: '@type',
+        timstampField: '@timestamp',
+        hostname: 'my-es-host.com',
+        port: '9200',
+        batchSize: 500,
+        name: 'main-es'
     }
 )
 
 addFilter(function (event) {
-    var data
+    var result = parsers.jsonParser(event)
+    if (result === false) {
+        return event.done()
+    }
 
-    if (event.data.message.substring(0, 6) === '@json:') {
-        try {
-            data = JSON.parse(event.data.message.substring(6))
-            event.data = util._extend(event.data, data)
-            event.data.message = event.data['@message']
-            delete event.data.originalMessage
+    // If the event message is literally 'useless' then cancel the event. The event will not be output anywhere
+    if (event.data.message === 'useless') {
+        return event.cancel()
+    }
 
-        } catch (error) {
-            event.data['@type'] = 'unparsable'
+    // If the event came from apache2 try and parse combined access logs
+    if (event.data.service === 'apache2') {
+        // Every parser has a .raw that provides the result back to you instead of modifying the event directly
+        var results = parsers.httpCombinedAccessParser.raw(event.data.message)
+        if (results.error) {
+            event.data['_type'] = 'http_unparseable'
+            event.data['parseError'] = results.error
+        } else {
+            // Parser succeeded so attach the parsed data to a new property on the event
+            event.data.http = results.data
         }
-
-    } else if (nginxRegex.test(event.data.service)) {
-        nginxCodec.decode(event, function () {
-            //TODO: need to cast some things to Number
-            if (event.data.nginx) {
-                event.data['@type'] = 'nginx_access'
-                delete event.data.originalMessage
-            } else {
-                event.data['@type'] = 'unparsable'
-            }
-
-            event.next()
-        })
-
-        return
     }
 
     event.next()
